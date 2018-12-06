@@ -1,0 +1,54 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a>设备操作记录</a></li>
+    </ul>
+    
+    <form method="post" class="js-ajax-form">
+        <table class="table table-hover table-bordered">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>序列号</th>
+                <th>操作用户</th>
+                <th>操作类型</th>
+                <th>时间</th>
+            </tr>
+            </thead>
+            <tbody>
+            <php>
+                $type=['','绑定','解绑','删除'];
+            </php>
+            <if condition="!empty($list)">
+                <foreach name="list" item="vo">
+                    <tr>
+                        <td>{$vo.id}</td>
+                        <td>{$vo['device_sn']}</td>
+                        <td>{$vo['mobile']}</td>
+                        <td>{$type[$vo['type']]}</td>
+                        <td>
+                        <?php 
+                            if(!empty($vo['create_time']) && $vo['create_time']>0){
+                                echo date('Y-m-d H:i:s',$vo['create_time']);
+                            }
+                        ?>
+                        </td>
+                       
+                    </tr>
+                </foreach>
+            <else/>
+                <tr>
+                    <td colspan="5">（暂无数据）</td>
+                </tr>
+            </if>
+            </tbody>
+        </table>
+        <div class="pagination">{$page}</div>
+    </form>
+</div>
+</body>
+<script src="__STATIC__/js/admin.js"></script>
+
+</html>

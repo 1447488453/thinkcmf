@@ -1,0 +1,106 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+ 
+    <div class="col-md-2">
+           
+        </div>
+    <div class="col-md-6">
+    <form class="form-horizontal js-ajax-form margin-top-20" role="form" action="{$action}" method="post" data-callback="closePage">
+            <input type="hidden" name="value" value="{$value}" />
+            <input type="hidden" name="id" value="{$id}" />
+            <input type="hidden" name="more" value="{$more}" />
+            <div class="tabbable">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="A">
+                        <div class="form-group">
+                            <label for="input-parent">管理员手机</label>
+                            <div>
+                                {$phone|default=''}                                
+                                <input placeholder="请输入验证码" style="margin:5px 0;" required type="text" class="form-control" id="input-verificode" name="verificode" value="" >
+                                <button type="button"  class="btn btn-info" onclick="getCode(this);">
+                                    获取验证码
+                                </button>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="form-group">
+                            <div class=" col-sm-10">
+                                <button type="submit" class="btn btn-primary js-ajax-submit">
+                                    确认
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+ 
+    </form>
+    </div>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+</body>
+<script type="text/javascript">
+
+    function closePage(res){
+        layer.msg(res.msg);
+        if(res.code){
+            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+            setTimeout(function(){
+                parent.location.reload();
+                parent.layer.close(index);
+            },2000)
+        }else{
+            setTimeout(function(){
+                document.location.reload();
+            },2000)
+        }
+    }
+
+
+    var wait=60;
+    var codeBtn = $("#getCode");
+    function getCode(o){
+        $.ajax({
+             type: "POST",
+             url: "{:url('setting/get_admin_verificode')}",
+             data:{type:'<?php echo $type; ?>'},
+             dataType: "json",
+             success: function(data){
+                layer.msg(data.msg);
+                if(data.code){
+                    $('#input-verificode').css('display','block');
+                    if (wait == 0) {
+                        o.removeAttribute("disabled");           
+                        o.value="发送验证码";
+                        wait = 60; 
+                    } else {                        
+                        o.setAttribute("disabled", true);
+                        o.value="重新发送（" + wait + "）";
+                        wait--;
+                        setTimeout(function() {
+                            fristtime(o)
+                        },1000); 
+                    }
+                }
+            }
+        });
+    }
+    function fristtime(o) {
+        if (wait == 0) {
+            o.removeAttribute("disabled");           
+            o.innerHTML="发送验证码";
+            wait = 60;
+        } else { 
+            o.setAttribute("disabled", true);
+            o.innerHTML="重新发送（" + wait + "）";
+            wait--; 
+            setTimeout(function() {
+                fristtime(o)
+            },
+            1000)
+        }
+    }
+</script>
+</html>

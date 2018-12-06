@@ -1,0 +1,167 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="javascript:;">积分兑换列表</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20" method="post" action="{:url('Score/score_change')}">
+      
+        时间:
+        <input type="text" class="form-control js-bootstrap-datetime" name="start_time"
+               value="{$start_time|default=''}"
+               style="width: 140px;" autocomplete="off">-
+        <input type="text" class="form-control js-bootstrap-datetime" name="end_time"
+               value="{$end_time|default=''}"
+               style="width: 140px;" autocomplete="off"> &nbsp; &nbsp;
+        关键字:
+        <input type="text" class="form-control" name="keyword" style="width: 200px;" value="{$keyword|default=''}" placeholder="用户手机号、钱包地址">&nbsp; &nbsp;
+
+        <input {$status==0?'checked':''} type="radio" name="status" value="0" >未审核 &nbsp;
+        <input {$status==3?'checked':''} type="radio" name="status" value="3" >确认中   &nbsp;&nbsp; 
+        <input {$status==2?'checked':''} type="radio" name="status" value="2" >已拒绝 &nbsp;
+        <input {$status==1?'checked':''} type="radio" name="status" value="1" >已通过   &nbsp;&nbsp; 
+        <input type="submit" class="btn btn-primary" value="搜索"/>
+        <a class="btn btn-danger" href="{:url('Score/score_change')}">清空</a>
+    </form>
+    <form class="js-ajax-form" action="" method="post">
+        <div class="table-actions">
+            <?php
+                $ids = '';
+                $idArr = [];
+                foreach ($list as $k => $v) {
+                    if($v['status']==0){
+                      $idArr[] = $v['id'];  
+                    } 
+                }
+            ?>
+            <button type="button" onclick="confirmBtn(this);" data-type="5" data-value="<?php echo implode(',', $idArr); ?>" data-more='yes' class="btn btn-warning btn-sm">本页一键审核通过</button>
+        </div>
+        <table class="table table-hover table-bordered table-list">
+            <thead>
+            <tr>
+                <th width="50">ID</th>
+                <th width="80">积分数量</th>
+                <th width="65">兑换用户</th>
+                <th width="65">状态</th>
+                <th width="100">第三方名称</th>
+                <th width="130">钱包地址</th>
+                <th width="130">TXID</th>
+                <th width="130">申请时间</th>
+                <th width="70">审核人</th>
+                <th width="70">审核时间</th>
+                <th width="100">操作</th>
+            </tr>
+            </thead>
+            <foreach name="list" item="vo">
+                <tr>
+                   
+                    <td><b>{$vo.id}</b></td>
+                    <td>
+                    <php>echo abs($vo['num']);</php>
+                    </td>
+                    <td>
+                        <a href="#" onclick="openUserDetailBtn(this);" data-id="{$vo['user_id']}" data-type="2">{$vo.mobile|default=$vo.user_login}</a>
+                    </td>
+                    <td>
+                        
+                      <!--   <if condition="$vo['status']==3">
+                        <font style="color:#e67e22;">确认中</font>
+                            
+                        </if> -->
+
+                        <if condition="$vo['status']==1">
+                            通过
+                        </if>
+                        <if condition="$vo['status']==0">
+                            待审核
+                        </if>
+                         <if condition="$vo['status']==2">
+                            拒绝
+                        </if>
+
+                    </td>
+                    <td>{$vo.third_party_platform}</td>
+                    <td>
+                        {$vo.wallet_address}
+                    </td>
+                    <td>
+                        {$vo.txid}
+                    </td>
+                    <td>
+                        {$vo.add_time}
+                    </td>
+                    <td>
+                        {$vo.audit_user_login}
+                    </td>
+                    <td>
+                        {$vo.update_time}
+                    </td>
+                    <td>
+                  
+                        <if condition="$vo['status']==0">
+                            <button type="button" class="btn btn-sm btn-warning" onclick="confirmBtn(this);" data-msg="是否通过审核？" data-id="{$vo['id']}" data-type="6" data-more='yes'>通过</button>
+                            
+                            <button type="button" class="btn btn-sm btn-default" onclick="promptBtn2(this);" data-msg="请输入驳回原因" data-id="{$vo['id']}" data-type="6" data-more='no'>拒绝</button> 
+
+                            <!-- <button type="button" class="btn btn-sm btn-default" onclick="confirmBtn(this);" data-msg="确认拒绝吗，本次冻结的积分将会返还？" data-id="{$vo['id']}" data-type="6" data-more='no'>拒绝</button>  -->
+
+                            
+                        </if>
+                        <!-- <a href="{:url('AdminAgentApply/delete',array('id'=>$vo['id']))}" class="js-ajax-delete">{:lang('DELETE')}</a> -->
+                    </td>
+                </tr>
+            </foreach>
+           
+        </table>
+        
+        <ul class="pagination">{$page|default=''}</ul>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    function reloadPage(win) {
+        win.location.reload();
+    }
+    function open_prompt(e){
+        var that = $(e);
+        layer.prompt({
+           formType: 2,
+           value: '',
+           shade:false,
+           title: '请输入拒绝原因',
+           area: ['600px', '300px'] //自定义文本域宽高
+        }, function(value, index, elem){
+           layer.load();
+           $.ajax({
+               type: "POST",
+               url: that.attr('data-href'),
+               data: {reason:value},
+               success: function(res){
+                   layer.closeAll('loading');
+                   layer.msg(res.msg);
+                   if(res.code){
+                        layer.close(index);
+                        setTimeout(function(){
+                            document.location.reload();
+                        },1500)
+                   }
+               },
+               error:function(){
+                layer.msg('网络异常');
+               }
+            }); 
+        });
+    }
+ 
+    $(function () {
+        setCookie("refersh_time", 0);
+        Wind.use('ajaxForm', 'artDialog', 'iframeTools', function () {
+            //批量复制
+           
+            
+        });
+    });
+</script>
+</body>
+</html>

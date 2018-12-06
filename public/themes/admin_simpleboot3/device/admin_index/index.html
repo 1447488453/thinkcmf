@@ -1,0 +1,162 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a>设备管理</a></li>
+        <if condition="cmf_auth_check(cmf_get_current_admin_id(), 'device/AdminIndex/add')"> 
+        <li class=""><a href="{:url('adminIndex/add')}">设备添加</a></li>
+        </if>
+    </ul>
+    <form class="well form-inline margin-top-20" method="post" action="{:url('device/adminIndex/index')}">
+        关键字：
+        <input class="form-control" type="text" name="keyword" style="width: 200px;" value="{:input('request.keyword')}" placeholder="设备名称/设备ID/设备序列号">
+        <input type="submit" class="btn btn-primary" value="搜索"/>
+        <a class="btn btn-danger" href="{:url('device/adminIndex/index')}">清空</a>
+        <if condition="cmf_auth_check(cmf_get_current_admin_id(), 'device/AdminIndex/import_excel')">
+            <button class="btn btn-default" type="button" onclick="openImportExcel();">导入excel</button>
+            <a class="btn btn-default" href="{:url('device/adminIndex/go_synchrodata')}">同步云平台数据</a>
+        </if>
+        
+
+
+    </form>
+    <form method="post" class="js-ajax-form">
+        <table class="table table-hover table-bordered">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>名称</th>
+                <th>设备ID</th>
+                <th>序列号</th>
+                <th>是否绑定</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <php>
+                $is_arr = ['否','是'];
+            </php>
+            <if condition="!empty($list)">
+                <foreach name="list" item="vo">
+                    <tr>
+                        <td>{$vo.id}</td>
+                        <td>{$vo['name']}</td>
+                        <td>{$vo['device_id']}</td>
+                        <td>{$vo['device_sn']}</td>
+                        
+                        <td>{$is_arr[$vo['is_bind']]}</td>
+                       
+                        <td>
+                        <?php 
+                            if(!empty($vo['create_time']) && $vo['create_time']>0){
+                                echo date('Y-m-d H:i:s',$vo['create_time']);
+                            }
+                        ?>
+                        </td>
+                        <td>
+                       <!--  <if  condition="cmf_auth_check(cmf_get_current_admin_id(), 'device/AdminIndex/replace_device')">
+                            <a href="#" class="btn btn-sm btn-success" data-device-id="{$vo['device_id']}" onclick="replaceDeviceBtn(this);">售后换机</a> 
+                        </if> -->
+                        <if  condition="isset($vo['is_untie']) and cmf_auth_check(cmf_get_current_admin_id(), 'device/AdminIndex/action_log')"> 
+                            <a href="#" class="btn btn-sm btn-warning" data-device-id="{$vo['device_id']}" onclick="openActionLogBtn(this);"><span class="badge badge-warning">!</span>操作记录</a> 
+                            <else/>
+                            <a href="#" class="btn btn-sm btn-info" data-device-id="{$vo['device_id']}" onclick="openActionLogBtn(this);">操作记录</a> 
+                        </if>
+                         
+                            <a href="#" class="btn btn-sm btn-info" data-device-id="{$vo['device_id']}" onclick="openReceiveLogBtn(this);">
+                                数据日志
+                            </a> 
+                            <a href="#" class="btn btn-sm btn-info" data-device-id="{$vo['device_sn']}" onclick="openUseLogBtn(this);">
+                                使用记录
+                            </a>
+                        <if  condition="cmf_auth_check(cmf_get_current_admin_id(), 'device/AdminIndex/edit')"> 
+                            <a class="btn btn-sm btn-primary" href="{:url('adminIndex/edit',array('id'=>$vo['id']))}" >编辑</a>
+                        </if>
+                        <if condition="cmf_auth_check(cmf_get_current_admin_id(), 'device/AdminIndex/delete')"> 
+                            <a class="btn btn-sm btn-danger js-ajax-dialog-btn" href="{:url('adminIndex/delete',array('id'=>$vo['id']))}" >删除</a>
+                         </if>
+                        </td>
+                    </tr>
+                </foreach>
+            <else/>
+                <tr>
+                    <td colspan="5">（暂无数据）</td>
+                </tr>
+            </if>
+            </tbody>
+        </table>
+        <div class="pagination">{$page}</div>
+    </form>
+</div>
+</body>
+<script src="__STATIC__/js/admin.js"></script>
+<script type="text/javascript">
+    function openImportExcel(e){
+        var _this = $(e);
+        layer.open({
+          type: 2,
+          shade: [0.1,'#fff'],
+          title:'导入excel',
+          area: ['80%', '70%'], //宽高
+          content: "{:url('adminIndex/import_excel')}"
+        });
+    }
+    function openKitImportExcel(e){
+        var _this = $(e);
+        layer.open({
+          type: 2,
+          shade: [0.1,'#fff'],
+          title:'导入excel',
+          area: ['80%', '70%'], //宽高
+          content: "{:url('adminIndex/recharge_kit_excel')}"
+        });
+    }
+    function replaceDeviceBtn(e){
+        //页面层
+        var value = '';
+        layer.open({
+            type: 2,
+            shade: [0.1,'#fff'],
+            title:'售后换机',
+            area: ['80%', '70%'], //宽高
+            content: '/device/admin_index/replace_device/device_id/'+$(e).attr('data-device-id')
+        });
+    }
+    function openActionLogBtn(e){
+        //页面层
+        var value = '';
+        layer.open({
+            type: 2,
+            shade: [0.1,'#fff'],
+            title:'设备操作记录',
+            area: ['80%', '70%'], //宽高
+            content: '/device/admin_index/action_log/device_id/'+$(e).attr('data-device-id')
+        });
+    }
+
+    function openReceiveLogBtn(e){
+        //页面层
+        var value = '';
+        layer.open({
+            type: 2,
+            shade: [0.1,'#fff'],
+            title:'设备数据记录',
+            area: ['80%', '70%'], //宽高
+            content: '/device/admin_index/receive_data_log/device_id/'+$(e).attr('data-device-id')
+        });
+    }
+    function openUseLogBtn(e){
+        //页面层
+        var value = '';
+        layer.open({
+            type: 2,
+            shade: [0.1,'#fff'],
+            title:'设备使用记录',
+            area: ['80%', '70%'], //宽高
+            content: '/device/admin_index/use_log/device_sn/'+$(e).attr('data-device-id')
+        });
+    }
+</script>
+</html>

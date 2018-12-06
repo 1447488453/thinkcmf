@@ -1,0 +1,148 @@
+<include file="public@header"/>
+<style>
+.item{position: static !important;width: auto !important;height:auto !important;}
+.panel{box-shadow:none;}
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="javascript:;">历史审核</a></li>
+    </ul>
+    <if condition="empty($start_time) && empty($end_time)">
+        <div class="row">
+            <div class="page-header" style="text-align:center;">
+              <h1 style="font-weight:600;">BPP剩余:{$no_exchange_total_bpp}</h1>
+            </div>
+        </div>
+        <else/>
+        <div class="row">
+            <div class="page-header">
+              <h3 style="font-size:18px;padding-left:18px;">筛选积分兑换量:{$exchange_total_score}</h3>
+            </div>
+        </div>
+    </if>
+    <if condition="empty($start_time) && empty($end_time)">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="row row-sm text-center">
+                <div class="col-xs-6">
+                    <div class="panel padder-v item">
+                        <div class="h1 text-info font-thin h1">{$exchange_total_score}</div>
+                        <span class="text-muted text-xs">积分兑换总量</span>
+                    </div>
+                </div>
+                
+                <div class="col-xs-6">
+                    <div class="panel padder-v item bg-info text-info">
+                        <div class="h1 text-fff font-thin h1">{$today_exchange_score}</div>
+                        <span class="text-muted text-xs">今日已兑换积分量</span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    </if>
+    <form class="well form-inline margin-top-20" method="post" action="{:url('History/index')}">
+        
+        关键字:
+        <input type="text" class="form-control" id="keyword" name="keyword" style="width: 200px;" value="{$keyword|default=''}" placeholder="用户手机号、钱包地址、TXID">&nbsp; &nbsp;
+
+        时间:
+        <input type="text" class="form-control js-bootstrap-datetime" id="start_time" name="start_time"
+               value="{$start_time|default=''}"
+               style="width: 140px;" autocomplete="off">-
+        <input type="text" class="form-control js-bootstrap-datetime" id="end_time" name="end_time"
+               value="{$end_time|default=''}"
+               style="width: 140px;" autocomplete="off"> &nbsp; &nbsp;
+         
+        <input id="search" type="submit" class="btn btn-primary" value="查询"/>
+        <a class="btn btn-danger" href="{:url('History/index')}">清空</a> &nbsp; &nbsp; &nbsp; &nbsp;
+        <if condition="!empty($start_time) && !empty($end_time) && !empty($list)">
+            <a target="_blank"  href="/admin/history/export?keyword={$keyword}&start_time={$start_time}&end_time={$end_time}" class="btn btn-default" type="button">导出表格</a>
+        </if>
+    </form>
+    <form class="js-ajax-form" action="" method="post">
+        
+
+        <table class="table table-hover table-bordered table-list" id="container">
+            <thead class="grid-sizer">
+            <tr>
+                <th width="80">数量</th>
+                <th width="60">兑换用户</th>
+                <th width="130">钱包地址</th>
+                <th width="130">TXID</th>
+                <th width="150">通过时间</th>
+                <th width="150">申请时间</th>
+                <th width="60">审核人</th>
+            </tr>
+            </thead>
+            <foreach name="list" item="vo">
+                <tr class="item">
+                    <td>
+                    <php>echo round(abs($vo['num']),2);</php>
+                    </td>
+                    <td>
+                        <a href="#" onclick="openUserDetailBtn(this);" data-id="{$vo['user_id']}" data-type="2">{$vo.mobile|default=$vo.user_login}</a>
+                    </td>
+                    <td>
+                        {$vo.wallet_address}
+                    </td>
+                    <td>
+                        {$vo.txid}
+                    </td>
+                    <td>
+                        {$vo.update_time}
+                    </td>
+                    <td>
+                        {$vo.add_time}
+                    </td>
+                    <td>
+                        {$vo.audit_user_nickname}
+                    </td>
+                </tr>
+            </foreach>          
+        </table>
+        <div class="js-infinite-scroll-loading text-center" style="display: none;">正在加载...</div>
+        <div id="nextpage"></div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="__STATIC__/js/masonry.pkgd.min.js"></script>
+<script src="__STATIC__/js/jquery.infiniteScroll.js"></script>
+<script>
+   $(function(){
+        var $container= $('#container').masonry({
+            columnWidth : '.grid-sizer',
+            itemSelector : '.item'
+        });
+        
+        $("#search").click(function(){
+                var href = '/withdraw/history/index?keyword='+$('#keyword').val()+'&start_time='+$('#start_time').val()+'&end_time='+$('#end_time').val();
+           
+            
+            window.location.href = href;
+        })
+
+        $('#nextpage').infiniteScroll({
+            loading:'.js-infinite-scroll-loading',
+            total_pages:{$total_page},
+            success:function(content){
+                var $items=$(content).find('#container .item');
+                if($items.length>0){
+                    //$('.tc-gridbox',$items).css('opacity',1);
+                    $container.append( $items )
+                    // add and layout newly prepended items
+                    .masonry( 'appended', $items );
+                    
+                }
+            },
+            finish:function(){
+                
+            }
+        });
+    });
+</script>
+</body>
+</html>

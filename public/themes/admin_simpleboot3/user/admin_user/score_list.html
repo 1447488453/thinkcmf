@@ -1,0 +1,29 @@
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>分值</th>
+            <th>状态</th>
+            <th>类型</th>
+            <th>创建时间</th>
+        </tr>
+    </thead>
+    <tbody>
+        <php>
+            $status=array("0"=>"待审核","1"=>"通过","2"=>"拒绝");
+        </php>
+
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>{$vo['num']}</td>
+                <td>{$status[$vo['status']]}</td>
+                <td>{$vo['reason']}</td>
+                <td>{$vo['add_time']}</td>
+            </tr>
+        </foreach>
+    </tbody>
+</table>
+
+                                           

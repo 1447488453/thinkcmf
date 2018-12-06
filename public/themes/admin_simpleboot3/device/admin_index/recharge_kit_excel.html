@@ -1,0 +1,60 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#A" data-toggle="tab">导入execl文件</a></li>
+    </ul>
+    <form class="form-horizontal js-ajax-form margin-top-20" role="form" action="{:url('adminIndex/recharge_kit_excel')}"
+          method="post" enctype="multipart/form-data" data-callback="closePage">
+        <fieldset>
+            <div class="tabbable">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="A">
+                        <div class="form-group">
+                            <label for="input-excel" class="col-sm-2 control-label"><span class="form-required">*</span>文件</label>
+                            <div class="col-md-6 col-sm-10">
+                                <input type="file" name="excel" id="input-excel" required type="text" class="form-control" value="" placeholder="请选择execl文件">
+                               
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="submit" class="btn btn-primary js-ajax-submit" data-refresh="1">
+                                    {:lang('SAVE')}
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </fieldset>
+    </form>
+
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+</body>
+<script>
+    function closePage(res){
+        
+        if(res.code){
+            layer.msg(res.msg);
+            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+            setTimeout(function(){
+                parent.location.reload();
+                parent.layer.close(index);
+            },2000)
+        }else{
+
+            layer.alert(res.msg, function(index){
+              //do something
+              layer.close(index);
+            });        
+      
+
+        }
+    }
+</script
+</html>

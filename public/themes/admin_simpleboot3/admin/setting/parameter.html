@@ -1,0 +1,271 @@
+<include file="public@header"/>
+
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#A" data-toggle="tab">系统参数设置</a></li>
+    </ul>
+    <div class="col-md-2">
+           
+        </div>
+    <div class="col-md-6">
+    <form class="form-horizontal js-ajax-form margin-top-20" role="form" action="{:url('setting/parameterPost')}"
+          method="post">
+
+            <div class="tabbable">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="A">
+                        <div class="form-group">
+                            <label for="input-parent"><span class="form-required">*</span>管理员手机</label>
+                            <div>
+                                <input style="margin:5px 0;" readonly required type="text" class="form-control" id="input-admin_phone" name="options[admin_phone]" value="{$parameter_settings.admin_phone|default='15757851183'}" >                                
+                                <input placeholder="请输入验证码" style="display: none;margin:5px 0;" required type="text" class="form-control" id="input-admin_phone_code" name="options[admin_phone_code]" value="" >
+                                <button type="button"  class="btn btn-info" onclick="getCode(this);">
+                                    获取验证码
+                                </button>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="form-group">
+                            <label for="input-parent"><span class="form-required">*</span>提币积分下限</label>
+                            <div>
+                                <input required type="text" class="form-control" id="input-exchange_lower_limit" name="options[exchange_lower_limit]"
+                                       value="{$parameter_settings.exchange_lower_limit|default='1000'}">
+                            </div>
+                        </div>
+                        <br/>
+                       <!--  <div class="form-group">
+                            <label for="input-parent"><span class="form-required">*</span>设备每日使用次数限制</label>
+                            <div>
+                                <input required type="text" class="form-control" id="input-device_use_number" name="options[device_use_number]"
+                                       value="{$parameter_settings.device_use_number|default=''}">
+                            </div>
+                        </div> -->
+                 <!--        <div class="form-group">
+                            <label for="input-parent"><span class="form-required">*</span>设备使用药包奖励积分</label>
+                            <div>
+                                <input required type="text" class="form-control" id="input-package_use_reward_score" name="options[package_use_reward_score]"
+                                       value="{$parameter_settings.package_use_reward_score|default=''}">
+                            </div>
+                        </div> -->
+                     <!--    <div class="form-group">
+                            <label for="input-parent"><span class="form-required">*</span>设备绑定赠送药包数</label>
+                            <div>
+                                <input required type="text" class="form-control" id="input-gift_drug_pack" name="options[gift_drug_pack]"
+                                       value="{$parameter_settings.gift_drug_pack|default='0'}">
+                            </div>
+                        </div> -->
+
+                 <!--        <div class="form-group">
+                            <label for="input-parent"><span class="form-required">*</span>设备上报的时间范围（{$parameter_settings.use_time_range|default='30~70'}分钟）</label>
+                            <div>
+                                <php>
+                                    if(isset($parameter_settings['use_time_range'])){
+                                        $use_time_range = explode('~',$parameter_settings['use_time_range']);
+                                    }else{
+                                        $use_time_range = [30,70];
+                                    }
+                                </php>
+                                <input id="range_slider" type="text" name="options[use_time_range]" data-min="0" data-max="100" data-from="{$use_time_range[0]}" data-to="{$use_time_range[0]}" data-type="double" data-postfix="分" data-prettify="false" data-grid="true" data-grid-num="1">
+                            </div>
+                        </div> -->
+
+                     <!--    <div class="form-group">
+                            <label for="input-parent"><span class="form-required">*</span>推荐奖励积分</label>
+                            <div>
+                                <input required type="text" class="form-control" id="input-register_reward_score" name="options[register_reward_score]"
+                                       value="{$parameter_settings.register_reward_score|default='0'}">
+                            </div>
+                        </div>
+                        <br/> -->
+
+
+                        <div class="form-group">
+                            <label for="input-parent">兑换手续费（%）</label>
+                            <div>
+                                <input required type="text" class="form-control" id="input-exchange_fee" name="options[exchange_fee]"
+                                       value="{$parameter_settings.exchange_fee|default='0'}">
+                            </div>
+                        </div>
+                        <br/>
+                        <!-- <div class="form-group">
+                            <label for="input-direct_referral_reward">是否开启直推奖励</label>
+                            <div>
+                                <php>
+                                    $direct_checked = '';
+                                    if(isset($parameter_settings['direct_referral_reward'])){
+                                        $direct_referral_reward = $parameter_settings['direct_referral_reward'];
+                                        if(intval($direct_referral_reward)){
+                                            $direct_checked = 'checked="checked"';
+                                        } 
+                                    }
+                                </php>
+                                <input type="checkbox" {$direct_checked} id="input-direct_referral_reward" name="options[direct_referral_reward]" value="1">
+                            </div>
+                        </div> -->
+
+                    
+                       <!--  <br/>
+                        <div class="form-group">
+                            <label for="input-parent"><span class="form-required">*</span>三级分销奖励（%）</label>
+                            <br/><label for="input-parent" style="font-size: 12px;color:#616161;"> &nbsp;&nbsp;一级</label>
+                            <div>
+                                <input required type="text" class="form-control" id="input-referrer_reward" name="options[referrer_reward][referrer_reward_1]"
+                                       value="{$referrer_reward.referrer_reward_1|default='3'}">
+                            </div>
+                            <br/><label for="input-parent" style="font-size: 12px;color:#616161;"> &nbsp;&nbsp;二级</label>
+                            <div>
+                                <input required type="text" class="form-control" id="input-referrer_reward" name="options[referrer_reward][referrer_reward_2]"
+                                       value="{$referrer_reward.referrer_reward_2|default='2'}">
+                            </div>
+                            <br/><label for="input-parent" style="font-size: 12px;color:#616161;"> &nbsp;&nbsp;三级</label>
+                            <div>
+                                <input required type="text" class="form-control" id="input-referrer_reward" name="options[referrer_reward][referrer_reward_3]"
+                                       value="{$referrer_reward.referrer_reward_3|default='1'}">
+                            </div>
+                        </div> -->
+
+                         <div class="form-group">
+                            <label for="input-parent">时间天数范围</label>
+                            <div>
+                                <input required type="text" class="form-control" id="input-range_days" name="options[range_days]"  value="{$parameter_settings.range_days|default='0'}">
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label for="input-parent">蜗牛达人参数</label>
+                            <div>
+                                <div style="color: green">达标步数:</div><input required type="text" class="form-control" id="input-wn_stepgoal" name="options[wn_stepgoal]"  value="{$parameter_settings.wn_stepgoal|default='0'}">
+
+                                <div style="color: green">达标天数:</div><input required type="text" class="form-control" id="input-wn_upgrade_days" name="options[wn_upgrade_days]" value="{$parameter_settings.wn_upgrade_days|default='0'}">
+
+                                <div style="color: green">降级天数:</div><input required type="text" class="form-control" id="input-wn_downgrade_days" name="options[wn_downgrade_days]" value="{$parameter_settings.wn_downgrade_days|default='0'}">
+
+                                <div style="color: green">头衔奖励积分:</div><input required type="text" class="form-control" id="input-wn_jb_score" name="options[wn_jb_score]" value="{$parameter_settings.wn_jb_score|default='0'}">
+
+                                <div style="color: green">达到步数奖励积分:</div><input required type="text" class="form-control" id="input-wn_add_score" name="options[wn_add_score]" value="{$parameter_settings.wn_add_score|default='0'}">
+                            </div>
+                        </div>
+                     
+
+                        <div class="form-group">
+                            <label for="input-parent">兔子达人参数</label>
+                            <div>
+                                <div style="color: green">达标步数:</div><input required type="text" class="form-control" id="input-tz_stepgoal" name="options[tz_stepgoal]"  value="{$parameter_settings.tz_stepgoal|default='0'}">
+
+                                <div style="color: green">达标天数:</div><input required type="text" class="form-control" id="input-tz_upgrade_days" name="options[tz_upgrade_days]" value="{$parameter_settings.tz_upgrade_days|default='0'}">
+
+                                <div style="color: green">降级天数:</div><input required type="text" class="form-control" id="input-tz_downgrade_days" name="options[tz_downgrade_days]" value="{$parameter_settings.tz_downgrade_days|default='0'}">
+
+                                <div style="color: green">头衔奖励积分:</div><input required type="text" class="form-control" id="input-tz_jb_score" name="options[tz_jb_score]" value="{$parameter_settings.tz_jb_score|default='0'}">
+
+                                <div style="color: green">达到步数奖励积分:</div><input required type="text" class="form-control" id="input-tz_add_score" name="options[tz_add_score]" value="{$parameter_settings.tz_add_score|default='0'}">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="input-parent">猎豹达人参数</label>
+                            <div>
+                                <div style="color: green">达标步数:</div><input required type="text" class="form-control" id="input-lb_stepgoal" name="options[lb_stepgoal]"  value="{$parameter_settings.lb_stepgoal|default='0'}">
+
+                                <div style="color: green">达标天数:</div><input required type="text" class="form-control" id="input-lb_upgrade_days" name="options[lb_upgrade_days]" value="{$parameter_settings.lb_upgrade_days|default='0'}">
+
+                                <div style="color: green">降级天数:</div><input required type="text" class="form-control" id="input-lb_downgrade_days" name="options[lb_downgrade_days]" value="{$parameter_settings.lb_downgrade_days|default='0'}">
+
+                                <div style="color: green">头衔奖励积分:</div><input required type="text" class="form-control" id="input-lb_jb_score" name="options[lb_jb_score]" value="{$parameter_settings.lb_jb_score|default='0'}">
+
+                                <div style="color: green">达到步数奖励积分:</div><input required type="text" class="form-control" id="input-lb_add_score" name="options[lb_add_score]" value="{$parameter_settings.lb_add_score|default='0'}">
+                            </div>
+                        </div>
+
+                        <br/>
+                        <div class="form-group">
+                            <label for="input-parent">安卓版本号</label>
+                            <div>
+                                <input type="text" class="form-control" id="input-system_version" name="options[system_version]"
+                                       value="{$parameter_settings.system_version|default='1.0.0'}">
+                            </div>
+                            <p class="help-block" style="color: red;">
+                                    设置新的升级版本号前请先在appupdate目录放置对应的版本升级包，包命名带上版本号，如zmxz101.apk表示1.0.1版本。</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="input-parent">更新包下载地址</label>
+                            <div>
+                                <input type="text" class="form-control" id="input-app_down_url" name="options[app_down_url]"
+                                       value="{$parameter_settings.app_down_url|default='http://down.zmiaosh.com/xunzhengyi/zmxz103.apk'}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class=" col-sm-10">
+                                <button type="submit" class="btn btn-primary js-ajax-submit" data-refresh="1">
+                                    {:lang('SAVE')}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+ 
+    </form>
+    </div>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+
+</body>
+<script type="text/javascript">
+ 
+
+    
+
+    // $("#range_slider").ionRangeSlider();
+
+    var wait=60;
+    var codeBtn = $("#getCode");
+    function getCode(o){
+        $.ajax({
+             type: "GET",
+             url: "{:url('setting/get_admin_verificode')}",
+             dataType: "json",
+             data:{type:4},
+             success: function(data){
+                layer.msg(data.msg);
+                 if(data.code){
+                    $('#input-admin_phone').attr('readonly',false);
+                    $('#input-admin_phone_code').css('display','block');
+                    if (wait == 0) {
+                        o.removeAttribute("disabled");           
+                        o.value="发送验证码";
+                        wait = 60; 
+                    } else {                        
+                        o.setAttribute("disabled", true);
+                        o.value="重新发送（" + wait + "）";
+                        wait--;
+                        setTimeout(function() {
+                            fristtime(o)
+                        },
+                        1000) 
+                    }
+                 }
+              }
+         });
+    }
+    function fristtime(o) {
+        if (wait == 0) {
+            o.removeAttribute("disabled");           
+            o.innerHTML="发送验证码";
+            wait = 60;
+        } else { 
+            o.setAttribute("disabled", true);
+            o.innerHTML="重新发送（" + wait + "）";
+            wait--; 
+            setTimeout(function() {
+                fristtime(o)
+            },
+            1000)
+        }
+    }
+</script>
+</html>

@@ -1,0 +1,71 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('adminIndex/audit_list')}">实名认证审核</a></li>
+        <li class="active"><a>实名审核详情</a></li>
+    </ul>
+    <form class="form-horizontal js-ajax-form margin-top-20" action="{:url('adminIndex/change_status')}" method="post">
+        <div class="form-group">
+            <label for="input-name" class="col-sm-2 control-label"><span class="form-required">*</span>姓名</label>
+            <div class="col-md-1 col-sm-10">
+                <input readonly="readonly" type="text" class="form-control" id="input-name" name="real_name" value="{$data.real_name}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="input-remark" class="col-sm-2 control-label">身份证号</label>
+           <div class="col-md-2 col-sm-10">
+                <input readonly="readonly" type="text" class="form-control" id="input-name" name="id_card" value="{$data.id_card}">
+            </div>
+        </div>
+         <div class="form-group">
+            <label for="input-remark" class="col-sm-2 control-label">身份证正面照</label>
+           <div class="col-md-6 col-sm-10">
+               <img src="{$data.sfz_front_img}">
+            </div>
+        </div>
+         <div class="form-group">
+            <label for="input-remark" class="col-sm-2 control-label">身份证背面照</label>
+           <div class="col-md-6 col-sm-10">
+               <img src="{$data.sfz_back_img}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="input-remark" class="col-sm-2 control-label">手持身份证照</label>
+           <div class="col-md-6 col-sm-10">
+               <img src="{$data.sfz_sc_img}">
+            </div>
+        </div>
+
+        <php>
+            $user_statuses=array("0"=>'待审核',"1"=>'通过',"2"=>'已拒绝');
+        </php>
+
+         <div class="form-group">
+            <label for="input-remark" class="col-sm-2 control-label">状态</label>
+           <div class="col-md-1 col-sm-5">
+                <input readonly="readonly" type="text" class="form-control" id="input-name"  value="{$user_statuses[$data['status']]}">
+            </div>
+        </div>
+
+         <div class="form-group">
+            <label for="input-remark" class="col-sm-2 control-label">备注</label>
+           <div class="col-md-6 col-sm-5">
+                <textarea type="text" class="form-control" id="input-remark" name="remark" >{$data.remark}</textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input type="hidden" name="id" value="{$data.id}"/>
+                <button name='status' value="1" type="submit" class="btn btn-primary js-ajax-submit">通过</button>
+                <button name='status' value="0" type="submit" class="btn btn-primary js-ajax-submit">待审核</button>
+                <button name='status' value="2" type="submit" class="btn btn-primary js-ajax-submit">拒绝</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

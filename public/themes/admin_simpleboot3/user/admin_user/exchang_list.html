@@ -1,0 +1,47 @@
+
+<table class="table table-hover table-bordered table-list">
+    <thead>
+    <tr>
+        <th width="50">ID</th>
+        <th width="80">积分数量</th>
+        <th width="65">状态</th>
+        <th width="100">第三方名称</th>
+        <th width="130">钱包地址</th>
+        <th width="130">申请时间</th>
+        <th width="70">审核人</th>
+        <th width="70">审核时间</th>
+    </tr>
+    </thead>
+
+    <php>
+        $status = ['待审核','通过','拒绝'];
+    </php>
+
+    <foreach name="list" item="vo">
+        <tr>
+           
+            <td><b>{$vo.id}</b></td>
+            <td>
+            <php>echo abs($vo['num']);</php>
+            </td>
+
+          
+            <td>{$status[$vo['status']]}</td>
+
+            <td>{$vo.third_party_platform}</td>
+            <td>
+                {$vo.wallet_address}
+            </td>
+            <td>
+                {$vo.add_time}
+            </td>
+            <td>
+                {$vo.audit_user_nickname}
+            </td>
+            <td>
+                {$vo.update_time}
+            </td>
+        </tr>
+    </foreach>
+</table>
+  
