@@ -66,6 +66,12 @@ class UserController extends ApiBaseController{
       $res['is_name_audit'] = $is_name_audit ? 1:0;
       $num =  Db::name('message_user_rel')->alias('a')->join('message m','a.message_id = m.id','left')->field('a.read_time,m.title,m.content,m.type,m.create_time')->where("a.user_id=$user_id and a.read_time=0 and a.is_del=0")->count('a.id');
       $res['is_read'] = $num>0?1:0;
+      $tb_time = Db::name('user_run')->where("user_id=$user_id and is_valid=1")->order('add_time desc')->limit(1)->value('add_time');
+      if($tb_time){
+        $res['tb_time']=date('Y-m-d H:i:s',$tb_time);
+      }else{
+        $res['tb_time'] = '';
+      }
     	return json(['error'=>0,'msg'=>'success','data'=>$res]);
     }
    	/**
@@ -209,7 +215,7 @@ class UserController extends ApiBaseController{
     	$user = new \app\api\model\UserModel();
       // $result = $user->ajax_add_info($params);
       // return $result;
-      $redis = new \Redis();
+      $redis = new Redis();
       $redis->connect('127.0.0.1', 6379);
       $redis->select(1);//选择数据库1
       try{
@@ -238,7 +244,7 @@ class UserController extends ApiBaseController{
       $token = $this->request->param('token');
       $Common = new CommonController();
       $user_id = $Common->getUserId($token);//获取登入用户的user_id
-    	$res = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time')->where("user_id=$user_id")->paginate(10)->toarray();
+    	$res = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time')->where("user_id=$user_id and is_valid=1")->paginate(10)->toarray();
     	foreach ($res['data'] as $key => $value){
     		$res['data'][$key]['add_time'] = date("Y-m-d H:i:s",$value['add_time']);
     	}

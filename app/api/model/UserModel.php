@@ -331,6 +331,7 @@ class UserModel extends Model{
      * 记录步数 心率 血压 睡眠 数据
      */
     public function ajax_add_info($params){
+
     	$token = $params['token'];
       $Common = new CommonController();
       $user_id = $Common->getUserId($token);//获取登入用户的user_id
@@ -339,27 +340,32 @@ class UserModel extends Model{
    		$data['user_id'] 	   =	$user_id;
    		if($type==1){//type=1记录步数2记录心率3记录睡眠4记录血压
    		// echo strtotime(date("Y-m-d"),time());当天零点的时间戳
-      $step_num = isset($params['step_num']) ?$params['step_num']:'';
+      $step_num   = isset($params['step_num']) ?$params['step_num']:'';
+      $height     = Db::name('user')->where('id',$user_id)->value('height');
+      $weight     = Db::name('user')->where('id',$user_id)->value('weight');
+      $stepLength = $this->ByHeight($height);//获取步距
+      $device_sn  = isset($params['device_id']) ? $params['device_id']:'';
       foreach ($step_num as $key => $value){
-        $data['stride']     = isset($value['stride'])   ?$value['stride']:'';
-
-        $stepLength         = $this->ByHeight($height);//获取步距
         $distance           = $value['step']*$stepLength/100;   //单位为米
         $data['consume']    = $distance*$weight*6/10/1000;  //单位为大卡
-        $data['consume']    = isset($value['consume'])    ? $value['consume']:'';
+        $data['stride']     = $stepLength;
         $data['time_long']  = isset($value['time_long'])  ? $value['time_long']:'';
-        $data['device_sn']  = isset($params['device_sn']) ? $params['device_sn']:'';
+        $data['device_sn']  = $device_sn;
         $data['add_time']   = isset($value['time'])       ? strtotime($value['time']):'';
         $data['step_num']   = isset($value['step'])       ? $value['step']:0;
         $res = Db::name('user_run')->insert($data);
       }
-       // if(date("H:i:s",$value['time'])>="23:00:00"){
-       //    $data['is_valid'] = 1;
-       //  }
-        $data['is_valid'] = 1;
-
-        $res = Db::name('user_run')->insert($data);
-        // if(date("H:i:s",$data['add_time'])>="23:00:00"){
+      // 步数达到一定时处理一些逻辑---------------------------
+        //每天一条总数据汇总
+        $total_data['user_id'] = $user_id;
+        $total_data['device_sn']  = $device_sn;
+        $total_data['is_valid'] = 1;
+        $total_data['stride']     = $stepLength;
+        $total_data['add_time'] = isset($params['up_time'])?$params['up_time']:0;
+        $total_data['step_num'] = isset($params['total_step_num'])?$params['total_step_num']:0;
+        $distance        = $total_data['step_num']*$stepLength/100;   //单位为米
+        $total_data['consume']  = $distance*$weight*6/10/1000;  //单位为大卡
+        $res = Db::name('user_run')->insert($total_data);
           $common = new \app\api\controller\CommonController();
           $jb_score  = 0;
           $add_score = 0;
@@ -374,12 +380,8 @@ class UserModel extends Model{
           }else{
             $jb_score   = get_parameter_settings('lb_jb_score'); //达到基本要求奖励积分
           }
-          $common->user_level($user_id,$level,$data['total_step_num'],$add_score,$jb_score);
-        // }
-
-      
-			// $res = Db::name('user_run')->insert($data);
-			// 步数达到一定时处理一些逻辑---------------------------
+          $common->user_level($user_id,$level,$total_data['step_num'],$add_score,$jb_score);
+			
      
 			//--------------------------------------------
 		}elseif($type==2){
@@ -418,6 +420,7 @@ class UserModel extends Model{
      * 根据身高计算步长
      */
     public function ByHeight($height){
+      $stepLength=62;
       if($height < 50) {
         $height = 50;
       }elseif($height>190){
