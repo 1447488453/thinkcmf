@@ -761,8 +761,13 @@ class UserController extends ApiBaseController{
                }
              }
         }
-
-        $res = $z[$week_id];  
+        
+        if(isset($z[$week_id])){
+          $res = $z[$week_id];
+        }else{
+          $res =array();
+        }
+        
         return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res]); 
     }
     //获取指定月步数的数据
