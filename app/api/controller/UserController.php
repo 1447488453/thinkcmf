@@ -667,7 +667,7 @@ class UserController extends ApiBaseController{
         $Common   = new CommonController();
         $user_id  = $Common->getUserId($token);
         //获取用户第一条数据得出第一周数据
-        $first_run = Db::name('user_run')->where("user_id = $user_id and is_valid=1")->limit(1)->order('add_time asc')->value('add_time');
+        $first_run = Db::name('user_run')->where("user_id = $user_id and is_valid=0")->limit(1)->order('add_time asc')->value('add_time');
         // 返回执行日期所在周的第一天(周一)日期
         $now = $first_run;    //当时的时间戳
         $number = date("w",$now);  //当时是周几
@@ -712,6 +712,7 @@ class UserController extends ApiBaseController{
         }
        
         $z['0'] =$q;
+        // print_r($z);exit;
         // 返回当前所在周的第一天(周一)日期
         $now1 = time();    //当时的时间戳
         $number1 = date("w",$now1);  //当时是周几
@@ -721,7 +722,7 @@ class UserController extends ApiBaseController{
         $n= strtotime(date("Y-m-d",$now1 - ($diff_day1 * 60 * 60 * 24)+60*60*24*7));
         // //从开始到现在有几周
         $count_week=($n-$a)/(60*60*24)/7-1;
-       
+      
         $week_id = isset($params['week_id'])?intval($params['week_id']):$count_week;//默认为当前周
 
         for($i=1;$i<=$count_week;$i++){
@@ -750,12 +751,10 @@ class UserController extends ApiBaseController{
              if($p1){
                foreach ($p1 as $key => $value) {
                  $d = array('00'=>0,'01'=>0,'02'=>0,'03'=>0,'04'=>0,'05'=>0,'06'=>0,'07'=>0,'08'=>0,'09'=>0,'10'=>0,'11'=>0,'12'=>0,'13'=>0,'14'=>0,'15'=>0,'16'=>0,'17'=>0,'18'=>0,'19'=>0,'20'=>0,'21'=>0,'22'=>0,'23'=>0);
-
                   foreach ($value as $k => $v) {
                      if(array_key_exists($v['add_date'],$d)){
                         $d[$v['add_date']] = $v['step_num'];
                         $z[$i][$key]= $d;
-                        
                       }
                   }
                }
