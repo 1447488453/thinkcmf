@@ -712,8 +712,6 @@ class UserController extends ApiBaseController{
         }
        
         $z['0'] =$q;
-
-        print_r($z['0']);exit;
         // 返回当前所在周的第一天(周一)日期
         $now1 = time();    //当时的时间戳
         $number1 = date("w",$now1);  //当时是周几
