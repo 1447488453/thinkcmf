@@ -747,7 +747,6 @@ class UserController extends ApiBaseController{
             $p1='';
             foreach ($data[$i] as $key => $value) {
               $data[$i][$key]['add_date'] = date('H',$value['add_time']);
-              
               $number = date("w",$value['add_time']);  //当时是周几
               $number = $number == 0 ? 7 : $number; //如遇周末,将0换成7
               $data[$i][$key]['day'] = $number;
@@ -780,8 +779,15 @@ class UserController extends ApiBaseController{
         }else{
           $res =array();
         }
+
+        if(isset($res_is_valid[$week_id])){
+          $res_is_valid = $res_is_valid[$week_id];
+        }else{
+          $res_is_valid =array();
+        }
+
         
-        return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res,'res_is_valid'=>$res_is_valid[$week_id]]); 
+        return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res,'res_is_valid'=>$res_is_valid]); 
     }
     //获取指定月步数的数据
     public function getmonth_info(){
