@@ -624,6 +624,9 @@ class UserController extends ApiBaseController{
         $res_is_valid = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id and is_valid=1 and add_time>=$m and add_time<=$n")->order('add_time desc')->select()->toarray();//当周的数据
         foreach ($res_is_valid as $key => $value) {
             $res_is_valid[$key]['add_time'] = date('Y-m-d',$value['add_time']);
+
+            $res_is_valid[$key]['consume'] = round($value['consume'],2);
+
             $number = date("w",$value['add_time']);  //当时是周几
             $number = $number == 0 ? 7 : $number; //如遇周末,将0换成7
             $res_is_valid[$key]['day'] = $number;
@@ -684,6 +687,7 @@ class UserController extends ApiBaseController{
         $res_is_valid['0'] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id and is_valid=1 and add_time>=$a and add_time<=$b")->order('add_time desc')->select()->toarray();//当周的数据
         foreach ($res_is_valid['0'] as $key => $value) {
          $res_is_valid['0'][$key]['add_time'] = date('Y-m-d',$value['add_time']);
+          $res_is_valid['0'][$key]['consume'] = round($value['consume'],2);
           $number = date("w",$value['add_time']);  //当时是周几
           $number = $number == 0 ? 7 : $number; //如遇周末,将0换成7
           $res_is_valid['0'][$key]['day'] = $number;
@@ -747,7 +751,8 @@ class UserController extends ApiBaseController{
 
             $res_is_valid[$i] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id and is_valid=1 and add_time>=$monday_time and add_time<=$sunday_time")->order('add_time desc')->select()->toarray();//当周的数据
             foreach ($res_is_valid[$i] as $key => $value) {
-             $res_is_valid[$i][$key]['add_time'] = date('Y-m-d',$value['add_time']);
+            $res_is_valid[$i][$key]['add_time'] = date('Y-m-d',$value['add_time']);
+            $res_is_valid[$i][$key]['consume'] = round($value['consume'],2);
 
             $number = date("w",$value['add_time']);  //当时是周几
             $number = $number == 0 ? 7 : $number; //如遇周末,将0换成7
