@@ -817,7 +817,7 @@ class UserController extends ApiBaseController{
       $month_first_day  = $res[0];
       $month_last_day   = $res[1];
       //指定月的数据
-      $res_month = Db::name('user_run')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day and is_valid=0")->select()->toarray();
+      $res_month = Db::name('user_run')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day and is_valid=1")->select()->toarray();
       $all_month_step   =0;
       $all_month_consume=0;
       $all_month_time   = 0;
