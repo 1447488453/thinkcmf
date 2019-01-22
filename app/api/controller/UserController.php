@@ -618,20 +618,21 @@ class UserController extends ApiBaseController{
         $diff_day = $number - 1; //求到周一差几天
         $m= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)));
         $n= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)+60*60*24*7))-1;
-        $res = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn')->where(" user_id = $user_id and add_time>=$m and add_time<=$n")->order('add_time desc')->select()->toarray();//当周的数据
+        $res = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id and is_valid=0 and add_time>=$m and add_time<=$n")->order('add_time desc')->select()->toarray();//当周的数据
+
+
+        $res_is_valid = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id and is_valid=1 and add_time>=$m and add_time<=$n")->order('add_time desc')->select()->toarray();//当周的数据
+        foreach ($res_is_valid as $key => $value) {
+         $res_is_valid[$key]['add_time'] = date('Y-m-d',$value['add_time']);
+        }
         foreach ($res as $key => $value) {
               $res[$key]['add_date'] = date('H',$value['add_time']);
-              // $jq_d = mb_substr($res[$key]['add_date'],0,1);
-              // if($jq_d==0){
-              //   $res[$key]['add_date'] = mb_substr($res[$key]['add_date'],1,1); 
-              // }
               $number = date("w",$value['add_time']);  //当时是周几
               $number = $number == 0 ? 7 : $number; //如遇周末,将0换成7
               $res[$key]['day'] = $number;
         }
 
-        // echo "<pre>";
-        // print_r($res);exit;
+       
         $week_day = array('1'=>'','2'=>'','3'=>'','4'=>'','5'=>'','6'=>'','7'=>'');
          //时间数组
         $c = array('00'=>0,'01'=>0,'02'=>0,'03'=>0,'04'=>0,'05'=>0,'06'=>0,'07'=>0,'08'=>0,'09'=>0,'10'=>0,'11'=>0,'12'=>0,'13'=>0,'14'=>0,'15'=>0,'16'=>0,'17'=>0,'18'=>0,'19'=>0,'20'=>0,'21'=>0,'22'=>0,'23'=>0);
@@ -641,9 +642,10 @@ class UserController extends ApiBaseController{
             if(array_key_exists($v['day'],$week_day)){
               $p[$v['day']][]= $v;
             }
+            if($v['is_valid']==1){
+              $p['count_day'] = $v;
+            }
         }
-
-
 
         if($p){
           foreach ($p as $key => $value) {
@@ -656,8 +658,8 @@ class UserController extends ApiBaseController{
               }
           }
         }
-        // print_r($q);exit;
-        return json(['error'=>0,'msg'=>'success','data'=>$q]);
+      
+        return json(['error'=>0,'msg'=>'success','data'=>$q,'res_is_valid'=>$res_is_valid]);
     }
 
     //获取指定周步数的数据
@@ -675,7 +677,13 @@ class UserController extends ApiBaseController{
         $diff_day = $number - 1; //求到周一差几天
         $a= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)));
         $b= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)+60*60*24*7))-1;
-        $data['0'] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn')->where(" user_id = $user_id  and is_valid=0 and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->toarray();//第一周的数据
+        $data['0'] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id  and is_valid=0 and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->toarray();//第一周的数据
+
+        $res_is_valid['0'] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id and is_valid=1 and add_time>=$a and add_time<=$b")->order('add_time desc')->select()->toarray();//当周的数据
+        foreach ($res_is_valid['0'] as $key => $value) {
+         $res_is_valid['0'][$key]['add_time'] = date('Y-m-d',$value['add_time']);
+        }
+
 
         if($data['0']){
           foreach ($data['0'] as $key => $value) {
@@ -729,6 +737,12 @@ class UserController extends ApiBaseController{
             $monday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*$i));
             $sunday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*($i+1)))-1;
             $data[$i] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn')->where(" user_id = $user_id and is_valid=0 and add_time>=$monday_time and add_time<=$sunday_time")->select()->toarray();//第N周的数据
+           
+
+            $res_is_valid[$i] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id and is_valid=1 and add_time>=$monday_time and add_time<=$sunday_time")->order('add_time desc')->select()->toarray();//当周的数据
+            foreach ($res_is_valid[$i] as $key => $value) {
+             $res_is_valid[$i][$key]['add_time'] = date('Y-m-d',$value['add_time']);
+            }
 
             $p1='';
             foreach ($data[$i] as $key => $value) {
@@ -760,14 +774,14 @@ class UserController extends ApiBaseController{
                }
              }
         }
-        
+
         if(isset($z[$week_id])){
           $res = $z[$week_id];
         }else{
           $res =array();
         }
         
-        return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res]); 
+        return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res,'res_is_valid'=>$res_is_valid[$week_id]]); 
     }
     //获取指定月步数的数据
     public function getmonth_info(){
