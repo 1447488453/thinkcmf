@@ -824,6 +824,7 @@ class UserController extends ApiBaseController{
       $all_month_jl     = 0;
       foreach($res_month as $key => $value){
               $res_month[$key]['add_date']  = date('Y-m-d H:i:s',$value['add_time']);
+              $res_month[$key]['consume']   = round($value['consume'],2);
               $all_month_step     +=$value['step_num'];
               $all_month_consume  +=$value['consume'];
               $all_month_time     +=$value['time_long'];
@@ -831,7 +832,7 @@ class UserController extends ApiBaseController{
       }
       $total['all_month_step']    =$all_month_step;
       $total['all_month_jl']      =$all_month_jl.'米';
-      $total['all_month_consume'] =$all_month_consume;
+      $total['all_month_consume'] =round($all_month_consume,2);
       $total['all_month_time']    =$all_month_time;
       return json(['error'=>0,'msg'=>'success','data'=>$res_month,'total'=>$total]);
     }
