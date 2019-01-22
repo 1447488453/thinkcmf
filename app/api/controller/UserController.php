@@ -797,11 +797,23 @@ class UserController extends ApiBaseController{
       $month_first_day  = $res[0];
       $month_last_day   = $res[1];
       //指定月的数据
-      $res_month = Db::name('user_run')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->select()->toarray();
-      foreach ($res_month as $key => $value) {
-              $res_month[$key]['add_date'] = date('Y-m-d H:i:s',$value['add_time']);
-            }
-      return json(['error'=>0,'msg'=>'success','data'=>$res_month]);
+      $res_month = Db::name('user_run')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day and is_valid=0")->select()->toarray();
+      $all_month_step   =0;
+      $all_month_consume=0;
+      $all_month_time   = 0;
+      $all_month_jl     = 0;
+      foreach($res_month as $key => $value){
+              $res_month[$key]['add_date']  = date('Y-m-d H:i:s',$value['add_time']);
+              $all_month_step     +=$value['step_num'];
+              $all_month_consume  +=$value['consume'];
+              $all_month_time     +=$value['time_long'];
+              $all_month_jl       +=$value['step_num']*$value['stride']/100;
+      }
+      $total['all_month_step']    =$all_month_step;
+      $total['all_month_jl']      =$all_month_jl.'米';
+      $total['all_month_consume'] =$all_month_consume;
+      $total['all_month_time']    =$all_month_time;
+      return json(['error'=>0,'msg'=>'success','data'=>$res_month,'total'=>$total]);
     }
 
     //获取指定日期当月的第一天和最后一天零点的时间戳
