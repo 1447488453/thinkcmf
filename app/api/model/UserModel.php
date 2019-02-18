@@ -389,12 +389,18 @@ class UserModel extends Model{
 			$data['max_heart_rate']     = isset($params['max_heart_rate'])?trim($params['max_heart_rate']):'';
 			$data['avg_heart_rate']     = isset($params['avg_heart_rate'])?trim($params['avg_heart_rate']):'';
 			$data['resting_heart_rate'] = isset($params['resting_heart_rate'])?trim($params['resting_heart_rate']):'';
+
+      $device_sn  = isset($params['device_id']) ? $params['device_id']:'';
+      $data['device_sn']  = $device_sn;
 			$res = Db::name('user_heart_rate')->insert($data);	
 		}elseif($type==3){
 			$data['deep_sleep'] 	  = isset($params['deep_sleep'])	?trim($params['deep_sleep']):'';
 			$data['light_sleep'] 	  = isset($params['light_sleep'])	?trim($params['light_sleep']):'';
 			$data['sleep_time'] 	  = isset($params['sleep_time'])	?trim($params['sleep_time']):'';
 			$data['clear_headed'] 	= isset($params['clear_headed'])?trim($params['clear_headed']):'';
+
+      $device_sn  = isset($params['device_id']) ? $params['device_id']:'';
+      $data['device_sn']  = $device_sn;
 			$res = Db::name('user_sleep')->insert($data);
 			//if(如果睡眠时间在22点到8点之间){
 			//增加积分奖励
@@ -405,6 +411,9 @@ class UserModel extends Model{
 			$data['blood_pressure'] 	= isset($params['blood_pressure'])	?trim($params['blood_pressure']):'';
 			$data['blood_oxygen'] 		= isset($params['blood_oxygen'])	?trim($params['blood_oxygen']):'';
 			$data['fatigue'] 			= isset($params['fatigue'])			?trim($params['fatigue']):'';
+
+      $device_sn  = isset($params['device_id']) ? $params['device_id']:'';
+      $data['device_sn']  = $device_sn;
 			$res = Db::name('user_blood_pressure')->insert($data);
 		}else{
 			return json(['error'=>0,'msg'=>'参数错误,type未传']);

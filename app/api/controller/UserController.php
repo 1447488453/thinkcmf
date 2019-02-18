@@ -686,8 +686,8 @@ class UserController extends ApiBaseController{
 
         $res_is_valid['0'] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id and is_valid=1 and add_time>=$a and add_time<=$b")->order('add_time desc')->select()->toarray();//当周的数据
         foreach ($res_is_valid['0'] as $key => $value) {
-         $res_is_valid['0'][$key]['add_time'] = date('Y-m-d',$value['add_time']);
-          $res_is_valid['0'][$key]['consume'] = round($value['consume'],2);
+          $res_is_valid['0'][$key]['add_time'] = date('Y-m-d',$value['add_time']);
+          $res_is_valid['0'][$key]['consume']  = round($value['consume'],2);
           $number = date("w",$value['add_time']);  //当时是周几
           $number = $number == 0 ? 7 : $number; //如遇周末,将0换成7
           $res_is_valid['0'][$key]['day'] = $number;
@@ -738,7 +738,7 @@ class UserController extends ApiBaseController{
         $diff_day1 = $number1 - 1; //求到周一差几天
         $m= strtotime(date("Y-m-d",$now1 - ($diff_day1 * 60 * 60 * 24)));
         $n= strtotime(date("Y-m-d",$now1 - ($diff_day1 * 60 * 60 * 24)+60*60*24*7));
-        // //从开始到现在有几周
+        //从开始到现在有几周
         $count_week=($n-$a)/(60*60*24)/7-1;
       
         $week_id = isset($params['week_id'])?intval($params['week_id']):$count_week;//默认为当前周
@@ -748,7 +748,6 @@ class UserController extends ApiBaseController{
             $sunday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*($i+1)))-1;
             $data[$i] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn')->where(" user_id = $user_id and is_valid=0 and add_time>=$monday_time and add_time<=$sunday_time")->select()->toarray();//第N周的数据
            
-
             $res_is_valid[$i] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id and is_valid=1 and add_time>=$monday_time and add_time<=$sunday_time")->order('add_time desc')->select()->toarray();//当周的数据
             foreach ($res_is_valid[$i] as $key => $value) {
             $res_is_valid[$i][$key]['add_time'] = date('Y-m-d',$value['add_time']);
@@ -818,8 +817,8 @@ class UserController extends ApiBaseController{
       $month_last_day   = $res[1];
       //指定月的数据
       $res_month = Db::name('user_run')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day and is_valid=1")->select()->toarray();
-      $all_month_step   =0;
-      $all_month_consume=0;
+      $all_month_step   = 0;
+      $all_month_consume= 0;
       $all_month_time   = 0;
       $all_month_jl     = 0;
       foreach($res_month as $key => $value){
@@ -845,6 +844,193 @@ class UserController extends ApiBaseController{
       $d        = strtotime($lastday)+60*60*24-1;
       return array($c,$d);
     }
+
+    //获取当前周的睡眠 心率 血压数据
+    public function get_sleep_info(){
+        $params = $this->request->param();
+        $token    = $params['token'];
+        $Common   = new CommonController();
+        $user_id  = $Common->getUserId($token);
+        // 返回当前所在周的第一天(周一)日期
+        $now = time();    //当时的时间戳
+        $number = date("w",$now);  //当时是周几
+        $number = $number == 0 ? 7 : $number; //如遇周末,将0换成7
+        $diff_day = $number - 1; //求到周一差几天
+        $m= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)));
+        $n= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)+60*60*24*7))-1;
+        $type = isset($params['type'])?intval($params['type']):0;
+        if($type==3){
+          $res = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time')->where(" user_id = $user_id and add_time>=$m and add_time<=$n")->order('add_time desc')->select() ->each(function($item, $key){
+            $week_day = date("w",$item['add_time']);  //当时是周几
+            $item['add_time'] = date('Y-m-d H:i:s',$item['add_time']);
+            $item['week_day'] = $week_day == 0 ? 7 : $week_day; //如遇周末,将0换成7
+            return $item;
+          });
+
+          //定义一周的天数
+            $week_day = array('1'=>'','2'=>'','3'=>'','4'=>'','5'=>'','6'=>'','7'=>'');
+            $p ='';
+            foreach ($res as $k => $v){ 
+                if(array_key_exists($v['week_day'],$week_day)){
+                  $p[$v['week_day']][]= $v;
+                }
+            }
+        }
+
+        if($type==2){
+           $res = Db::name('user_heart_rate')->field('id,user_id,min_heart_rate,max_heart_rate,avg_heart_rate,resting_heart_rate,add_time')->where(" user_id = $user_id and add_time>=$m and add_time<=$n")->order('add_time desc')->select() ->each(function($item, $key){
+            $week_day = date("w",$item['add_time']);  //当时是周几
+            $item['add_time'] = date('Y-m-d H:i:s',$item['add_time']);
+            $item['week_day'] = $week_day == 0 ? 7 : $week_day; //如遇周末,将0换成7
+            return $item;
+          });
+
+            //定义一周的天数
+            $week_day = array('1'=>'','2'=>'','3'=>'','4'=>'','5'=>'','6'=>'','7'=>'');
+            $p ='';
+            foreach ($res as $k => $v){ 
+                if(array_key_exists($v['week_day'],$week_day)){
+                  $p[$v['week_day']][]= $v;
+                }
+            }
+        }
+
+        if($type==4){
+           $res = Db::name('user_blood_pressure')->field('id,user_id,blood_pressure,blood_oxygen,fatigue,add_time')->where(" user_id = $user_id and add_time>=$m and add_time<=$n")->order('add_time desc')->select() ->each(function($item, $key){
+            $week_day = date("w",$item['add_time']);  //当时是周几
+            $item['add_time'] = date('Y-m-d H:i:s',$item['add_time']);
+            $item['week_day'] = $week_day == 0 ? 7 : $week_day; //如遇周末,将0换成7
+            return $item;
+          });
+
+           //定义一周的天数
+            $week_day = array('1'=>'','2'=>'','3'=>'','4'=>'','5'=>'','6'=>'','7'=>'');
+            $p ='';
+            foreach ($res as $k => $v){ 
+                if(array_key_exists($v['week_day'],$week_day)){
+                  $p[$v['week_day']][]= $v;
+                }
+            }
+
+        }
+       
+        return json(['error'=>0,'msg'=>'获取成功','data'=>$p]);
+       
+    }
+    //获取指定周的睡眠 心率 血压数据
+    public function get_zdweek_info(){
+        $params = $this->request->param();
+        $token    = $params['token'];
+        $Common   = new CommonController();
+        $user_id  = $Common->getUserId($token);
+
+        //type  2心率3睡眠4血压
+        $type = isset($params['type'])?intval($params['type']):0;
+        //获取用户第一条数据得出第一周数据
+        if($type==3){
+          $first_run = Db::name('user_sleep')->where("user_id = $user_id ")->limit(1)->order('add_time asc')->value('add_time');
+        }
+        if($type==2){
+          $first_run = Db::name('user_heart_rate')->where("user_id = $user_id ")->limit(1)->order('add_time asc')->value('add_time');
+        }
+        if($type==4){
+          $first_run = Db::name('user_blood_pressure')->where("user_id = $user_id ")->limit(1)->order('add_time asc')->value('add_time');
+        }
+
+        // 返回执行日期所在周的第一天(周一)日期
+        $now = $first_run;    //当时的时间戳
+        $number = date("w",$now);  //当时是周几
+        $number = $number == 0 ? 7 : $number; //如遇周末,将0换成7
+        $diff_day = $number - 1; //求到周一差几天
+        $a= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)));
+        $b= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)+60*60*24*7))-1;
+
+        if($type==3){
+           $data['0'] = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time')->where(" user_id = $user_id  and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->toarray();//第一周的数据
+        }
+
+        if($type==2){
+            $data['0'] = Db::name('user_heart_rate')->field('id,user_id,min_heart_rate,max_heart_rate,avg_heart_rate,resting_heart_rate,add_time')->where(" user_id = $user_id  and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->toarray();//第一周的数据
+        }
+        if($type==4){
+            $data['0'] = Db::name('user_blood_pressure')->field('id,user_id,blood_pressure,blood_oxygen,fatigue,add_time')->where(" user_id = $user_id  and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->toarray();//第一周的数据
+        }   
+
+        if($data['0']){
+          foreach ($data['0'] as $key => $value) {
+            $data['0'][$key]['add_date'] = date('H',$value['add_time']);
+            $number = date("w",$value['add_time']);  //当时是周几
+            $number = $number == 0 ? 7 : $number; //如遇周末,将0换成7
+            $data['0'][$key]['day'] = $number;
+          }
+        }
+        $week_day = array('1'=>'','2'=>'','3'=>'','4'=>'','5'=>'','6'=>'','7'=>'');
+        $p ='';
+        if($data['0']){
+          foreach ($data['0'] as $k => $v) { 
+              if(array_key_exists($v['day'],$week_day)){
+                $p[$v['day']][]= $v;
+              }
+          }
+        }
+        $z['0'] =$p;
+          // 返回当前所在周的第一天(周一)日期
+        $now1 = time();    //当时的时间戳
+        $number1 = date("w",$now1);  //当时是周几
+        $number1 = $number1 == 0 ? 7 : $number1; //如遇周末,将0换成7
+        $diff_day1 = $number1 - 1; //求到周一差几天
+        $m= strtotime(date("Y-m-d",$now1 - ($diff_day1 * 60 * 60 * 24)));
+        $n= strtotime(date("Y-m-d",$now1 - ($diff_day1 * 60 * 60 * 24)+60*60*24*7));
+        //从开始到现在有几周
+        $count_week=($n-$a)/(60*60*24)/7-1;
+        
+        $week_id = isset($params['week_id'])?intval($params['week_id']):$count_week;//默认为当前周
+
+        for($i=1;$i<=$count_week;$i++){
+            $monday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*$i));
+            $sunday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*($i+1)))-1;
+            
+            if($type==3){
+                $data[$i] = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time')->where(" user_id = $user_id and add_time>=$monday_time and add_time<=$sunday_time")->select()->toarray();//第N周的数据
+            }
+
+            if($type==2){
+                $data[$i] = Db::name('user_heart_rate')->field('id,user_id,min_heart_rate,max_heart_rate,avg_heart_rate,resting_heart_rate,add_time')->where(" user_id = $user_id and add_time>=$monday_time and add_time<=$sunday_time")->select()->toarray();//第N周的数据
+            }
+
+            if($type==4){
+                $data[$i] = Db::name('user_blood_pressure')->field('id,user_id,blood_pressure,blood_oxygen,fatigue,add_time')->where(" user_id = $user_id and add_time>=$monday_time and add_time<=$sunday_time")->select()->toarray();//第N周的数据
+            }
+
+            
+            $p1='';
+            foreach ($data[$i] as $key => $value) {
+              $data[$i][$key]['add_date'] = date('H',$value['add_time']);
+              $number = date("w",$value['add_time']);  //当时是周几
+              $number = $number == 0 ? 7 : $number; //如遇周末,将0换成7
+              $data[$i][$key]['day'] = $number;
+            } 
+             $week_day1 = array('1'=>'','2'=>'','3'=>'','4'=>'','5'=>'','6'=>'','7'=>'');
+
+             foreach ($data[$i] as $key => $value) {
+               if(array_key_exists($value['day'],$week_day1)){
+                  $p1[$value['day']][]= $value;
+                }
+             }
+             $z[$i]= $p1;    
+    }
+        if(isset($z[$week_id])){
+          $res = $z[$week_id];
+        }else{
+          $res =array();
+        }
+        // echo "<pre>";
+        // print_r($res);exit;
+     return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res]); 
+  }
+
+      
+    
 
     //设置设备各种属性状态
     public function set_sb_status(){
