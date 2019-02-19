@@ -816,7 +816,7 @@ class UserController extends ApiBaseController{
       $month_first_day  = $res[0];
       $month_last_day   = $res[1];
       //指定月的数据
-      $res_month = Db::name('user_run')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day and is_valid=1")->select()->toarray();
+      $res_month = Db::name('user_run')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day and is_valid=1")->order('add_time asc')->select()->toarray();
       $all_month_step   = 0;
       $all_month_consume= 0;
       $all_month_time   = 0;
@@ -1044,7 +1044,7 @@ class UserController extends ApiBaseController{
       $type = isset($params['type'])?intval($params['type']):0;//type  2心率3睡眠4血压
       //指定月的数据
       if($type==2){
-        $res_month = Db::name('user_heart_rate')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->select()->toarray();
+        $res_month = Db::name('user_heart_rate')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->order('add_time asc')->select()->toarray();
         $all_month_min_heart_rate   = 0;
         $all_month_max_heart_rate= 0;
         $all_month_avg_heart_rate   = 0;
