@@ -5,7 +5,6 @@ use think\Db;
 use app\admin\model\ScoreModel;
 use app\api\controller\CommonController;
 use think\Validate;
-
 use think\Cache\driver\Redis;
 
 class UserController extends ApiBaseController{
@@ -213,29 +212,29 @@ class UserController extends ApiBaseController{
     public function ajax_add_info(){
     	$params = $this->request->param();
     	$user = new \app\api\model\UserModel();
-      // $result = $user->ajax_add_info($params);
-      // return $result;
-      $redis = new Redis();
-      $redis->connect('127.0.0.1', 6379);
-      $redis->select(1);//选择数据库1
-      try{
-        $redis->LPUSH('step_data',json_encode($params));
-      }catch(Exception $e){
-        echo $e->getMessage();
-        exit;
-      }
-      do{
-          try{
-          $value = json_decode($redis->LPOP('step_data'),true);
-          if(!$value){
-            break;
-          }
-          $result = $user->ajax_add_info($value);
-          }catch(Exception $e){
-            echo $e->getMessage();exit;
-          }
-      }while(true);
-		  return $result;
+      $result = $user->ajax_add_info($params);
+      return $result;
+    //   $redis = new Redis();
+    //   $redis->connect('127.0.0.1', 6379);
+    //   $redis->select(1);//选择数据库1
+    //   try{
+    //     $redis->LPUSH('step_data',json_encode($params));
+    //   }catch(Exception $e){
+    //     echo $e->getMessage();
+    //     exit;
+    //   }
+    //   do{
+    //       try{
+    //       $value = json_decode($redis->LPOP('step_data'),true);
+    //       if(!$value){
+    //         break;
+    //       }
+    //       $result = $user->ajax_add_info($value);
+    //       }catch(Exception $e){
+    //         echo $e->getMessage();exit;
+    //       }
+    //   }while(true);
+		  // return $result;
     }
     /**
      * 获取步数记录
@@ -1046,15 +1045,15 @@ class UserController extends ApiBaseController{
       if($type==2){
         $res_month = Db::name('user_heart_rate')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->order('add_time asc')->select()->toarray();
         $all_month_min_heart_rate   = 0;
-        $all_month_max_heart_rate= 0;
+        $all_month_max_heart_rate   = 0;
         $all_month_avg_heart_rate   = 0;
         $all_month_resting_heart_rate     = 0;
         foreach($res_month as $key => $value){
-                $res_month[$key]['add_date']  = date('Y-m-d H:i:s',$value['add_time']);
-                $all_month_min_heart_rate     +=$value['min_heart_rate'];
-                $all_month_max_heart_rate     +=$value['max_heart_rate'];
-                $all_month_avg_heart_rate     +=$value['avg_heart_rate'];
-                $all_month_resting_heart_rate +=$value['resting_heart_rate'];
+                $res_month[$key]['add_date']   = date('Y-m-d H:i:s',$value['add_time']);
+                $all_month_min_heart_rate     += $value['min_heart_rate'];
+                $all_month_max_heart_rate     += $value['max_heart_rate'];
+                $all_month_avg_heart_rate     += $value['avg_heart_rate'];
+                $all_month_resting_heart_rate += $value['resting_heart_rate'];
         }
         $total['all_month_min_heart_rate']        = $all_month_min_heart_rate;
         $total['all_month_max_heart_rate']        = $all_month_max_heart_rate;
@@ -1070,10 +1069,10 @@ class UserController extends ApiBaseController{
         $all_month_clear_headed     = 0;
         foreach($res_month as $key => $value){
                 $res_month[$key]['add_date']  = date('Y-m-d H:i:s',$value['add_time']);
-                $all_month_deep_sleep      +=$value['deep_sleep'];
-                $all_month_light_sleep     +=$value['light_sleep'];
-                $all_month_sleep_time      +=$value['sleep_time'];
-                $all_month_clear_headed    +=$value['clear_headed'];
+                $all_month_deep_sleep      += $value['deep_sleep'];
+                $all_month_light_sleep     += $value['light_sleep'];
+                $all_month_sleep_time      += $value['sleep_time'];
+                $all_month_clear_headed    += $value['clear_headed'];
         }
         $total['all_month_deep_sleep']        = $all_month_deep_sleep;
         $total['all_month_light_sleep']       = $all_month_light_sleep;
