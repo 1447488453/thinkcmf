@@ -989,7 +989,6 @@ class UserController extends ApiBaseController{
         for($i=1;$i<=$count_week;$i++){
             $monday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*$i));
             $sunday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*($i+1)))-1;
-            
             if($type==3){
                 $data[$i] = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time')->where(" user_id = $user_id and add_time>=$monday_time and add_time<=$sunday_time")->select()->toarray();//第N周的数据
             }
@@ -1018,7 +1017,7 @@ class UserController extends ApiBaseController{
                 }
              }
              $z[$i]= $p1;    
-    }
+        }
         if(isset($z[$week_id])){
           $res = $z[$week_id];
         }else{
@@ -1026,9 +1025,81 @@ class UserController extends ApiBaseController{
         }
         // echo "<pre>";
         // print_r($res);exit;
-     return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res]); 
-  }
+        return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res]); 
+    }
+    //获取指定月的睡眠 心率 血压数据
+    public function get_zdmonth_info(){
+      $params = $this->request->param();
+      $month_time = isset($params['month_time'])?$params['month_time']:'';
+      if(!$month_time){
+          return json(['error'=>-1,'msg'=>'传参错误']); 
+      }
+      $token    = $params['token'];
+      $Common   = new CommonController();
+      $user_id  = $Common->getUserId($token);
+      $res = $this->GetTheMonth($month_time);
+      $month_first_day  = $res[0];
+      $month_last_day   = $res[1];
 
+      $type = isset($params['type'])?intval($params['type']):0;//type  2心率3睡眠4血压
+      //指定月的数据
+      if($type==2){
+        $res_month = Db::name('user_heart_rate')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->select()->toarray();
+        $all_month_min_heart_rate   = 0;
+        $all_month_max_heart_rate= 0;
+        $all_month_avg_heart_rate   = 0;
+        $all_month_resting_heart_rate     = 0;
+        foreach($res_month as $key => $value){
+                $res_month[$key]['add_date']  = date('Y-m-d H:i:s',$value['add_time']);
+                $all_month_min_heart_rate     +=$value['min_heart_rate'];
+                $all_month_max_heart_rate     +=$value['max_heart_rate'];
+                $all_month_avg_heart_rate     +=$value['avg_heart_rate'];
+                $all_month_resting_heart_rate +=$value['resting_heart_rate'];
+        }
+        $total['all_month_min_heart_rate']        = $all_month_min_heart_rate;
+        $total['all_month_max_heart_rate']        = $all_month_max_heart_rate;
+        $total['all_month_avg_heart_rate']        = $all_month_avg_heart_rate;
+        $total['all_month_resting_heart_rate']    = $all_month_resting_heart_rate;
+      }
+
+      if($type==3){
+        $res_month = Db::name('user_sleep')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->select()->toarray();
+        $all_month_deep_sleep       = 0;
+        $all_month_light_sleep      = 0;
+        $all_month_sleep_time       = 0;
+        $all_month_clear_headed     = 0;
+        foreach($res_month as $key => $value){
+                $res_month[$key]['add_date']  = date('Y-m-d H:i:s',$value['add_time']);
+                $all_month_deep_sleep      +=$value['deep_sleep'];
+                $all_month_light_sleep     +=$value['light_sleep'];
+                $all_month_sleep_time      +=$value['sleep_time'];
+                $all_month_clear_headed    +=$value['clear_headed'];
+        }
+        $total['all_month_deep_sleep']        = $all_month_deep_sleep;
+        $total['all_month_light_sleep']       = $all_month_light_sleep;
+        $total['all_month_sleep_time']        = $all_month_sleep_time;
+        $total['all_month_clear_headed']      = $all_month_clear_headed;
+      }
+
+      if($type==4){
+        $res_month = Db::name('user_blood_pressure')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->select()->toarray();
+        $all_month_blood_pressure  = 0;
+        $all_month_blood_oxygen    = 0;
+        $all_month_fatigue         = 0;
+      
+        foreach($res_month as $key => $value){
+                $res_month[$key]['add_date']  = date('Y-m-d H:i:s',$value['add_time']);
+                $all_month_blood_pressure    +=$value['blood_pressure'];
+                $all_month_blood_oxygen      +=$value['blood_oxygen'];
+                $all_month_fatigue           +=$value['fatigue'];    
+        }
+        $total['all_month_blood_pressure']    = $all_month_blood_pressure;
+        $total['all_month_blood_oxygen']      = $all_month_blood_oxygen;
+        $total['all_month_fatigue']           = $all_month_fatigue;
+      }
+
+      return json(['error'=>0,'msg'=>'success','data'=>$res_month,'total'=>$total]);
+    }
       
     
 

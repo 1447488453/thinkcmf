@@ -410,7 +410,7 @@ class UserModel extends Model{
 		}elseif($type==4){
 			$data['blood_pressure'] 	= isset($params['blood_pressure'])	?trim($params['blood_pressure']):'';
 			$data['blood_oxygen'] 		= isset($params['blood_oxygen'])	?trim($params['blood_oxygen']):'';
-			$data['fatigue'] 			= isset($params['fatigue'])			?trim($params['fatigue']):'';
+			$data['fatigue'] 			    = isset($params['fatigue'])			?trim($params['fatigue']):'';
 
       $device_sn  = isset($params['device_id']) ? $params['device_id']:'';
       $data['device_sn']  = $device_sn;
