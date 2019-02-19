@@ -392,6 +392,8 @@ class UserModel extends Model{
 
       $device_sn  = isset($params['device_id']) ? $params['device_id']:'';
       $data['device_sn']  = $device_sn;
+
+      $data['add_time'] = isset($params['up_time'])?$params['up_time']:0;
 			$res = Db::name('user_heart_rate')->insert($data);	
 		}elseif($type==3){
 			$data['deep_sleep'] 	  = isset($params['deep_sleep'])	?trim($params['deep_sleep']):'';
@@ -401,6 +403,8 @@ class UserModel extends Model{
 
       $device_sn  = isset($params['device_id']) ? $params['device_id']:'';
       $data['device_sn']  = $device_sn;
+
+      $data['add_time'] = isset($params['up_time'])?$params['up_time']:0;
 			$res = Db::name('user_sleep')->insert($data);
 			//if(如果睡眠时间在22点到8点之间){
 			//增加积分奖励
@@ -414,6 +418,8 @@ class UserModel extends Model{
 
       $device_sn  = isset($params['device_id']) ? $params['device_id']:'';
       $data['device_sn']  = $device_sn;
+
+      $data['add_time'] = isset($params['up_time'])?$params['up_time']:0;
 			$res = Db::name('user_blood_pressure')->insert($data);
 		}else{
 			return json(['error'=>0,'msg'=>'参数错误,type未传']);
