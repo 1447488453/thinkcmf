@@ -415,10 +415,8 @@ class UserModel extends Model{
 			$data['blood_pressure'] 	= isset($params['blood_pressure'])	?trim($params['blood_pressure']):'';
 			$data['blood_oxygen'] 		= isset($params['blood_oxygen'])	?trim($params['blood_oxygen']):'';
 			$data['fatigue'] 			    = isset($params['fatigue'])			?trim($params['fatigue']):'';
-
       $device_sn  = isset($params['device_id']) ? $params['device_id']:'';
       $data['device_sn']  = $device_sn;
-
       $data['add_time'] = isset($params['up_time'])?$params['up_time']:0;
 			$res = Db::name('user_blood_pressure')->insert($data);
 		}else{
