@@ -65,7 +65,13 @@ class UserController extends ApiBaseController{
       $res['is_name_audit'] = $is_name_audit ? 1:0;
       $num =  Db::name('message_user_rel')->alias('a')->join('message m','a.message_id = m.id','left')->field('a.read_time,m.title,m.content,m.type,m.create_time')->where("a.user_id=$user_id and a.read_time=0 and a.is_del=0")->count('a.id');
       $res['is_read'] = $num>0?1:0;
-      $tb_time = Db::name('user_run')->where("user_id=$user_id and is_valid=1")->order('add_time desc')->limit(1)->value('add_time');
+      $device_sn = Db::name('device_user_rel')->where("user_id=$user_id and status=1")->value('device_id');
+      if($device_sn){
+        $tb_time = Db::name('user_run')->where("user_id=$user_id and is_valid=1")->order('add_time desc')->limit(1)->value('add_time');
+      }else{
+        $tb_time = '';
+      }
+     
       if($tb_time){
         $res['tb_time']=date('Y-m-d H:i:s',$tb_time);
       }else{
@@ -1044,22 +1050,22 @@ class UserController extends ApiBaseController{
       $type = isset($params['type'])?intval($params['type']):0;//type  2心率3睡眠4血压
       //指定月的数据
       if($type==2){
-        $res_month = Db::name('user_heart_rate')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->order('add_time asc')->select()->toarray();
-        $all_month_min_heart_rate   = 0;
-        $all_month_max_heart_rate   = 0;
-        $all_month_avg_heart_rate   = 0;
-        $all_month_resting_heart_rate     = 0;
-        foreach($res_month as $key => $value){
-            $res_month[$key]['add_date']   = date('Y-m-d H:i:s',$value['add_time']);
-            $all_month_min_heart_rate     += $value['min_heart_rate'];
-            $all_month_max_heart_rate     += $value['max_heart_rate'];
-            $all_month_avg_heart_rate     += $value['avg_heart_rate'];
-            $all_month_resting_heart_rate += $value['resting_heart_rate'];
-        }
-        $total['all_month_min_heart_rate']        = $all_month_min_heart_rate;
-        $total['all_month_max_heart_rate']        = $all_month_max_heart_rate;
-        $total['all_month_avg_heart_rate']        = $all_month_avg_heart_rate;
-        $total['all_month_resting_heart_rate']    = $all_month_resting_heart_rate;
+          $res_month = Db::name('user_heart_rate')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->order('add_time asc')->select()->toarray();
+          $all_month_min_heart_rate   = 0;
+          $all_month_max_heart_rate   = 0;
+          $all_month_avg_heart_rate   = 0;
+          $all_month_resting_heart_rate     = 0;
+          foreach($res_month as $key => $value){
+              $res_month[$key]['add_date']   = date('Y-m-d H:i:s',$value['add_time']);
+              $all_month_min_heart_rate     += $value['min_heart_rate'];
+              $all_month_max_heart_rate     += $value['max_heart_rate'];
+              $all_month_avg_heart_rate     += $value['avg_heart_rate'];
+              $all_month_resting_heart_rate += $value['resting_heart_rate'];
+          }
+          $total['all_month_min_heart_rate']        = $all_month_min_heart_rate;
+          $total['all_month_max_heart_rate']        = $all_month_max_heart_rate;
+          $total['all_month_avg_heart_rate']        = $all_month_avg_heart_rate;
+          $total['all_month_resting_heart_rate']    = $all_month_resting_heart_rate;
       }
 
       if($type==3){
