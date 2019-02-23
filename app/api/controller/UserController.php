@@ -67,7 +67,9 @@ class UserController extends ApiBaseController{
       $res['is_read'] = $num>0?1:0;
       $device_sn = Db::name('device_user_rel')->where("user_id=$user_id and status=1")->value('device_id');
       if($device_sn){
-        $tb_time = Db::name('user_run')->where("user_id=$user_id and is_valid=1")->order('add_time desc')->limit(1)->value('add_time');
+        $bd_time = Db::name('device_user_rel')->where("user_id=$user_id and status=1")->value('update_time');
+        $res['bd_time'] = $bd_time;
+        $tb_time = Db::name('user_run')->where("user_id=$user_id and is_valid=1 and device_sn=$device_sn")->order('add_time desc')->limit(1)->value('add_time');
       }else{
         $tb_time = '';
       }
