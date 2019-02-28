@@ -403,8 +403,9 @@ class UserModel extends Model{
 
       $device_sn  = isset($params['device_id']) ? $params['device_id']:'';
       $data['device_sn']  = $device_sn;
-
+ 
       $data['add_time'] = isset($params['up_time'])?$params['up_time']:0;
+      $data['array_data'] = isset($params['array_data'])?serialize($params['array_data']):'';
 			$res = Db::name('user_sleep')->insert($data);
 			//if(如果睡眠时间在22点到8点之间){
 			//增加积分奖励

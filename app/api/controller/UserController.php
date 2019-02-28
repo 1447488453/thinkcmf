@@ -868,10 +868,13 @@ class UserController extends ApiBaseController{
         $n= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)+60*60*24*7))-1;
         $type = isset($params['type'])?intval($params['type']):0;
         if($type==3){
-          $res = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time')->where(" user_id = $user_id and add_time>=$m and add_time<=$n")->order('add_time desc')->select() ->each(function($item, $key){
+          $res = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time,array_data')->where(" user_id = $user_id and add_time>=$m and add_time<=$n")->order('add_time desc')->select() ->each(function($item, $key){
             $week_day = date("w",$item['add_time']);  //当时是周几
             $item['add_time'] = date('Y-m-d H:i:s',$item['add_time']);
             $item['week_day'] = $week_day == 0 ? 7 : $week_day; //如遇周末,将0换成7
+            if($item['array_data']){
+              $item['array_data'] = unserialize($item['array_data']);
+            }
             return $item;
           });
 
@@ -954,7 +957,12 @@ class UserController extends ApiBaseController{
         $b= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)+60*60*24*7))-1;
 
         if($type==3){
-           $data['0'] = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time')->where(" user_id = $user_id  and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->toarray();//第一周的数据
+           $data['0'] = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time,array_data')->where(" user_id = $user_id  and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->each(function($item,$key){
+                if($item['array_data']){
+                  $item['array_data'] = unserialize($item['array_data']);
+                }
+                return $item;
+           })->toarray();//第一周的数据
         }
 
         if($type==2){
@@ -998,7 +1006,12 @@ class UserController extends ApiBaseController{
             $monday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*$i));
             $sunday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*($i+1)))-1;
             if($type==3){
-                $data[$i] = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time')->where(" user_id = $user_id and add_time>=$monday_time and add_time<=$sunday_time")->select()->toarray();//第N周的数据
+                $data[$i] = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time')->where(" user_id = $user_id and add_time>=$monday_time and add_time<=$sunday_time")->select()->each(function($item,$key){
+                if($item['array_data']){
+                  $item['array_data'] = unserialize($item['array_data']);
+                }
+                return $item;
+                })->toarray();//第N周的数据
             }
 
             if($type==2){
