@@ -405,7 +405,7 @@ class UserModel extends Model{
       $data['device_sn']  = $device_sn;
  
       $data['add_time'] = isset($params['up_time'])?$params['up_time']:0;
-      $a_time = Db::name('user_sleep')->field('add_time')->order('add_time desc')->where("user_id=$user_id and device_sn=$device_sn")->find();
+      $a_time = Db::name('user_sleep')->field('add_time')->where("user_id=$user_id and device_sn=$device_sn")->order('add_time desc')->limit(1)->select()->toarray();
       $a_time = date('Y-m-d',$add_time['add_time']);
       $data['array_data'] = isset($params['array_data'])?serialize($params['array_data']):'';
       if($add_time==$data['add_time']){
