@@ -406,7 +406,7 @@ class UserModel extends Model{
  
       $data['add_time'] = isset($params['up_time'])?$params['up_time']:0;
       $a_time = Db::name('user_sleep')->field('add_time')->where("user_id=$user_id and device_sn='$device_sn'")->order("add_time desc")->select()->toarray();
-      if($a_time){
+      if($a_time['data']){
          $a_time = date('Y-m-d',$a_time['add_time']);
        }else{
          $a_time = ''; 
