@@ -1006,7 +1006,7 @@ class UserController extends ApiBaseController{
             $monday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*$i));
             $sunday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*($i+1)))-1;
             if($type==3){
-                $data[$i] = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time')->where(" user_id = $user_id and add_time>=$monday_time and add_time<=$sunday_time")->select()->each(function($item,$key){
+                $data[$i] = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time,array_data')->where(" user_id = $user_id and add_time>=$monday_time and add_time<=$sunday_time")->select()->each(function($item,$key){
                 if($item['array_data']){
                   $item['array_data'] = unserialize($item['array_data']);
                 }
