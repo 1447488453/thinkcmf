@@ -405,19 +405,18 @@ class UserModel extends Model{
       $data['device_sn']  = $device_sn;
  
       $data['add_time'] = isset($params['up_time'])?$params['up_time']:0;
-      $a_time = Db::name('user_sleep')->field('add_time')->where("user_id=$user_id and device_sn='$device_sn'")->order("add_time desc")->select()->toarray();
-      if($a_time['data']){
+      $a_time = Db::name('user_sleep')->field('add_time')->where("user_id=$user_id and device_sn='$device_sn'")->order("add_time desc")->find();
+      // print_r($a_time);exit;
+      if($a_time){
          $a_time = date('Y-m-d',$a_time['add_time']);
        }else{
-         $a_time = ''; 
+         $a_time = '';
        }
-     
       $data['array_data'] = isset($params['array_data'])?serialize($params['array_data']):'';
-      if($a_time==date('Y-m-d',$data['add_time'])){
-        //----------------
+      if($a_time!==date('Y-m-d',$data['add_time'])){
+          $res = Db::name('user_sleep')->insert($data);
       }else{
-
-        $res = Db::name('user_sleep')->insert($data);
+          $res = 1;
       }
      
 			
