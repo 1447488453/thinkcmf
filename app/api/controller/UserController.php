@@ -698,7 +698,6 @@ class UserController extends ApiBaseController{
         $a= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)));
         $b= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)+60*60*24*7))-1;
         $data['0'] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where("device_sn ='$device_sn' and user_id = $user_id  and is_valid=0 and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->toarray();//第一周的数据
-
         $res_is_valid['0'] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where("device_sn ='$device_sn' and user_id = $user_id and is_valid=1 and add_time>=$a and add_time<=$b")->order('add_time desc')->select()->toarray();//当周的数据
         foreach ($res_is_valid['0'] as $key => $value) {
           $res_is_valid['0'][$key]['add_time'] = date('Y-m-d',$value['add_time']);
@@ -706,7 +705,6 @@ class UserController extends ApiBaseController{
           $number = date("w",$value['add_time']);  //当时是周几
           $number = $number == 0 ? 7 : $number; //如遇周末,将0换成7
           $res_is_valid['0'][$key]['day'] = $number;
-
         }
 
 
@@ -743,7 +741,8 @@ class UserController extends ApiBaseController{
               }
           }
         }
-       
+        $q['a']=date('Y-m-d',$a);
+        $q['b']=date('Y-m-d',$b);
         $z['0'] =$q;
         // print_r($z);exit;
         // 返回当前所在周的第一天(周一)日期
@@ -801,6 +800,8 @@ class UserController extends ApiBaseController{
                       }
                   }
                }
+               $z[$i]['monday_time'] =date('Y-m-d',$monday_time);
+               $z[$i]['sunday_time'] =date('Y-m-d',$sunday_time);
             }
         }
 
@@ -1007,6 +1008,9 @@ class UserController extends ApiBaseController{
               }
           }
         }
+
+        $P['monday_time']=date('Y-m-d',$a);
+        $P['sunday_time']=date('Y-m-d',$b);
         $z['0'] =$p;
           // 返回当前所在周的第一天(周一)日期
         $now1 = time();    //当时的时间戳
@@ -1055,7 +1059,10 @@ class UserController extends ApiBaseController{
                   $p1[$value['day']][]= $value;
                 }
              }
-             $z[$i]= $p1;    
+             $z[$i]= $p1; 
+
+              $z[$i]['monday_time'] =date('Y-m-d',$monday_time);
+              $z[$i]['sunday_time'] =date('Y-m-d',$sunday_time);   
         }
         if(isset($z[$week_id])){
           $res = $z[$week_id];
