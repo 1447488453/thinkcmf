@@ -1095,6 +1095,7 @@ class UserController extends ApiBaseController{
             $all_month_light_sleep     += $value['light_sleep'];
             $all_month_sleep_time      += $value['sleep_time'];
             $all_month_clear_headed    += $value['clear_headed'];
+            $res_month[$key]['array_data'] = unserialize($value['array_data']);
         }
         $total['all_month_deep_sleep']        = $all_month_deep_sleep;
         $total['all_month_light_sleep']       = $all_month_light_sleep;
