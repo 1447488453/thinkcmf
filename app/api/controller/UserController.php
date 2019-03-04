@@ -619,6 +619,9 @@ class UserController extends ApiBaseController{
         $token    = $params['token'];
         $Common   = new CommonController();
         $user_id  = $Common->getUserId($token);
+
+        //当前绑定的设备号
+        $device_sn = Db::name('device_user_rel')->where("user_id=$user_id and status=1")->value('device_id');
         // 返回当前所在周的第一天(周一)日期
         $now = time();    //当时的时间戳
         $number = date("w",$now);  //当时是周几
@@ -626,10 +629,10 @@ class UserController extends ApiBaseController{
         $diff_day = $number - 1; //求到周一差几天
         $m= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)));
         $n= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)+60*60*24*7))-1;
-        $res = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id and is_valid=0 and add_time>=$m and add_time<=$n")->order('add_time desc')->select()->toarray();//当周的数据
+        $res = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where("device_sn =$device_sn and user_id = $user_id and is_valid=0 and add_time>=$m and add_time<=$n")->order('add_time desc')->select()->toarray();//当周的数据
 
 
-        $res_is_valid = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id and is_valid=1 and add_time>=$m and add_time<=$n")->order('add_time desc')->select()->toarray();//当周的数据
+        $res_is_valid = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" device_sn =$device_sn and user_id = $user_id and is_valid=1 and add_time>=$m and add_time<=$n")->order('add_time desc')->select()->toarray();//当周的数据
         foreach ($res_is_valid as $key => $value) {
             $res_is_valid[$key]['add_time'] = date('Y-m-d',$value['add_time']);
 
@@ -681,8 +684,12 @@ class UserController extends ApiBaseController{
         $token    = $params['token'];
         $Common   = new CommonController();
         $user_id  = $Common->getUserId($token);
+
+        //当前绑定的设备号
+        $device_sn = Db::name('device_user_rel')->where("user_id=$user_id and status=1")->value('device_id');
+
         //获取用户第一条数据得出第一周数据
-        $first_run = Db::name('user_run')->where("user_id = $user_id and is_valid=0")->limit(1)->order('add_time asc')->value('add_time');
+        $first_run = Db::name('user_run')->where(" device_sn =$device_sn and user_id = $user_id and is_valid=0")->limit(1)->order('add_time asc')->value('add_time');
         // 返回执行日期所在周的第一天(周一)日期
         $now = $first_run;    //当时的时间戳
         $number = date("w",$now);  //当时是周几
@@ -690,9 +697,9 @@ class UserController extends ApiBaseController{
         $diff_day = $number - 1; //求到周一差几天
         $a= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)));
         $b= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)+60*60*24*7))-1;
-        $data['0'] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id  and is_valid=0 and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->toarray();//第一周的数据
+        $data['0'] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where("device_sn =$device_sn and user_id = $user_id  and is_valid=0 and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->toarray();//第一周的数据
 
-        $res_is_valid['0'] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id and is_valid=1 and add_time>=$a and add_time<=$b")->order('add_time desc')->select()->toarray();//当周的数据
+        $res_is_valid['0'] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where("device_sn =$device_sn and user_id = $user_id and is_valid=1 and add_time>=$a and add_time<=$b")->order('add_time desc')->select()->toarray();//当周的数据
         foreach ($res_is_valid['0'] as $key => $value) {
           $res_is_valid['0'][$key]['add_time'] = date('Y-m-d',$value['add_time']);
           $res_is_valid['0'][$key]['consume']  = round($value['consume'],2);
@@ -754,9 +761,9 @@ class UserController extends ApiBaseController{
         for($i=1;$i<=$count_week;$i++){
             $monday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*$i));
             $sunday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*($i+1)))-1;
-            $data[$i] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn')->where(" user_id = $user_id and is_valid=0 and add_time>=$monday_time and add_time<=$sunday_time")->select()->toarray();//第N周的数据
+            $data[$i] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn')->where("device_sn =$device_sn and user_id = $user_id and is_valid=0 and add_time>=$monday_time and add_time<=$sunday_time")->select()->toarray();//第N周的数据
            
-            $res_is_valid[$i] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where(" user_id = $user_id and is_valid=1 and add_time>=$monday_time and add_time<=$sunday_time")->order('add_time desc')->select()->toarray();//当周的数据
+            $res_is_valid[$i] = Db::name('user_run')->field('id,user_id,step_num,stride,consume,time_long,add_time,device_sn,is_valid')->where("device_sn =$device_sn and user_id = $user_id and is_valid=1 and add_time>=$monday_time and add_time<=$sunday_time")->order('add_time desc')->select()->toarray();//当周的数据
             foreach ($res_is_valid[$i] as $key => $value) {
             $res_is_valid[$i][$key]['add_time'] = date('Y-m-d',$value['add_time']);
             $res_is_valid[$i][$key]['consume'] = round($value['consume'],2);
@@ -820,11 +827,15 @@ class UserController extends ApiBaseController{
       $token    = $params['token'];
       $Common   = new CommonController();
       $user_id  = $Common->getUserId($token);
+
+      //当前绑定的设备号
+      $device_sn = Db::name('device_user_rel')->where("user_id=$user_id and status=1")->value('device_id');
+
       $res = $this->GetTheMonth($month_time);
       $month_first_day  = $res[0];
       $month_last_day   = $res[1];
       //指定月的数据
-      $res_month = Db::name('user_run')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day and is_valid=1")->order('add_time asc')->select()->toarray();
+      $res_month = Db::name('user_run')->where("device_sn =$device_sn and user_id = $user_id ")->where("add_time>=$month_first_day and add_time<=$month_last_day and is_valid=1")->order('add_time asc')->select()->toarray();
       $all_month_step   = 0;
       $all_month_consume= 0;
       $all_month_time   = 0;
@@ -859,6 +870,10 @@ class UserController extends ApiBaseController{
         $token    = $params['token'];
         $Common   = new CommonController();
         $user_id  = $Common->getUserId($token);
+
+      //当前绑定的设备号
+      $device_sn = Db::name('device_user_rel')->where("user_id=$user_id and status=1")->value('device_id');
+
         // 返回当前所在周的第一天(周一)日期
         $now = time();    //当时的时间戳
         $number = date("w",$now);  //当时是周几
@@ -868,7 +883,7 @@ class UserController extends ApiBaseController{
         $n= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)+60*60*24*7))-1;
         $type = isset($params['type'])?intval($params['type']):0;
         if($type==3){
-          $res = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time,array_data')->where(" user_id = $user_id and add_time>=$m and add_time<=$n")->order('add_time desc')->select() ->each(function($item, $key){
+          $res = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time,array_data')->where("device_sn =$device_sn and user_id = $user_id and add_time>=$m and add_time<=$n")->order('add_time desc')->select() ->each(function($item, $key){
             $week_day = date("w",$item['add_time']);  //当时是周几
             $item['add_time'] = date('Y-m-d H:i:s',$item['add_time']);
             $item['week_day'] = $week_day == 0 ? 7 : $week_day; //如遇周末,将0换成7
@@ -889,7 +904,7 @@ class UserController extends ApiBaseController{
         }
 
         if($type==2){
-           $res = Db::name('user_heart_rate')->field('id,user_id,min_heart_rate,max_heart_rate,avg_heart_rate,resting_heart_rate,add_time')->where(" user_id = $user_id and add_time>=$m and add_time<=$n")->order('add_time desc')->select() ->each(function($item, $key){
+           $res = Db::name('user_heart_rate')->field('id,user_id,min_heart_rate,max_heart_rate,avg_heart_rate,resting_heart_rate,add_time')->where("device_sn =$device_sn and  user_id = $user_id and add_time>=$m and add_time<=$n")->order('add_time desc')->select() ->each(function($item, $key){
             $week_day = date("w",$item['add_time']);  //当时是周几
             $item['add_time'] = date('Y-m-d H:i:s',$item['add_time']);
             $item['week_day'] = $week_day == 0 ? 7 : $week_day; //如遇周末,将0换成7
@@ -907,7 +922,7 @@ class UserController extends ApiBaseController{
         }
 
         if($type==4){
-           $res = Db::name('user_blood_pressure')->field('id,user_id,blood_pressure,blood_oxygen,fatigue,add_time')->where(" user_id = $user_id and add_time>=$m and add_time<=$n")->order('add_time desc')->select() ->each(function($item, $key){
+           $res = Db::name('user_blood_pressure')->field('id,user_id,blood_pressure,blood_oxygen,fatigue,add_time')->where("device_sn =$device_sn and  user_id = $user_id and add_time>=$m and add_time<=$n")->order('add_time desc')->select() ->each(function($item, $key){
             $week_day = date("w",$item['add_time']);  //当时是周几
             $item['add_time'] = date('Y-m-d H:i:s',$item['add_time']);
             $item['week_day'] = $week_day == 0 ? 7 : $week_day; //如遇周末,将0换成7
@@ -934,18 +949,21 @@ class UserController extends ApiBaseController{
         $token    = $params['token'];
         $Common   = new CommonController();
         $user_id  = $Common->getUserId($token);
+      
+        //当前绑定的设备号
+      $device_sn = Db::name('device_user_rel')->where("user_id=$user_id and status=1")->value('device_id');
 
         //type  2心率3睡眠4血压
         $type = isset($params['type'])?intval($params['type']):0;
         //获取用户第一条数据得出第一周数据
         if($type==3){
-          $first_run = Db::name('user_sleep')->where("user_id = $user_id ")->limit(1)->order('add_time asc')->value('add_time');
+          $first_run = Db::name('user_sleep')->where("device_sn =$device_sn and user_id = $user_id ")->limit(1)->order('add_time asc')->value('add_time');
         }
         if($type==2){
-          $first_run = Db::name('user_heart_rate')->where("user_id = $user_id ")->limit(1)->order('add_time asc')->value('add_time');
+          $first_run = Db::name('user_heart_rate')->where("device_sn =$device_sn anduser_id = $user_id ")->limit(1)->order('add_time asc')->value('add_time');
         }
         if($type==4){
-          $first_run = Db::name('user_blood_pressure')->where("user_id = $user_id ")->limit(1)->order('add_time asc')->value('add_time');
+          $first_run = Db::name('user_blood_pressure')->where("device_sn =$device_sn and user_id = $user_id ")->limit(1)->order('add_time asc')->value('add_time');
         }
 
         // 返回执行日期所在周的第一天(周一)日期
@@ -957,7 +975,7 @@ class UserController extends ApiBaseController{
         $b= strtotime(date("Y-m-d",$now - ($diff_day * 60 * 60 * 24)+60*60*24*7))-1;
 
         if($type==3){
-           $data['0'] = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time,array_data')->where(" user_id = $user_id  and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->each(function($item,$key){
+           $data['0'] = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time,array_data')->where("device_sn =$device_sn and user_id = $user_id  and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->each(function($item,$key){
                 if($item['array_data']){
                   $item['array_data'] = unserialize($item['array_data']);
                 }
@@ -966,10 +984,10 @@ class UserController extends ApiBaseController{
         }
 
         if($type==2){
-            $data['0'] = Db::name('user_heart_rate')->field('id,user_id,min_heart_rate,max_heart_rate,avg_heart_rate,resting_heart_rate,add_time')->where(" user_id = $user_id  and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->toarray();//第一周的数据
+            $data['0'] = Db::name('user_heart_rate')->field('id,user_id,min_heart_rate,max_heart_rate,avg_heart_rate,resting_heart_rate,add_time')->where("device_sn =$device_sn and user_id = $user_id  and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->toarray();//第一周的数据
         }
         if($type==4){
-            $data['0'] = Db::name('user_blood_pressure')->field('id,user_id,blood_pressure,blood_oxygen,fatigue,add_time')->where(" user_id = $user_id  and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->toarray();//第一周的数据
+            $data['0'] = Db::name('user_blood_pressure')->field('id,user_id,blood_pressure,blood_oxygen,fatigue,add_time')->where("device_sn =$device_sn and user_id = $user_id  and add_time>=$a and add_time<=$b")->order("add_time desc")->select()->toarray();//第一周的数据
         }   
 
         if($data['0']){
@@ -1006,7 +1024,7 @@ class UserController extends ApiBaseController{
             $monday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*$i));
             $sunday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*($i+1)))-1;
             if($type==3){
-                $data[$i] = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time,array_data')->where(" user_id = $user_id and add_time>=$monday_time and add_time<=$sunday_time")->select()->each(function($item,$key){
+                $data[$i] = Db::name('user_sleep')->field('id,user_id,deep_sleep,light_sleep,sleep_time,clear_headed,add_time,array_data')->where("device_sn =$device_sn and user_id = $user_id and add_time>=$monday_time and add_time<=$sunday_time")->select()->each(function($item,$key){
                 if($item['array_data']){
                   $item['array_data'] = unserialize($item['array_data']);
                 }
@@ -1015,11 +1033,11 @@ class UserController extends ApiBaseController{
             }
 
             if($type==2){
-                $data[$i] = Db::name('user_heart_rate')->field('id,user_id,min_heart_rate,max_heart_rate,avg_heart_rate,resting_heart_rate,add_time')->where(" user_id = $user_id and add_time>=$monday_time and add_time<=$sunday_time")->select()->toarray();//第N周的数据
+                $data[$i] = Db::name('user_heart_rate')->field('id,user_id,min_heart_rate,max_heart_rate,avg_heart_rate,resting_heart_rate,add_time')->where("device_sn =$device_sn and user_id = $user_id and add_time>=$monday_time and add_time<=$sunday_time")->select()->toarray();//第N周的数据
             }
 
             if($type==4){
-                $data[$i] = Db::name('user_blood_pressure')->field('id,user_id,blood_pressure,blood_oxygen,fatigue,add_time')->where(" user_id = $user_id and add_time>=$monday_time and add_time<=$sunday_time")->select()->toarray();//第N周的数据
+                $data[$i] = Db::name('user_blood_pressure')->field('id,user_id,blood_pressure,blood_oxygen,fatigue,add_time')->where("device_sn =$device_sn and user_id = $user_id and add_time>=$monday_time and add_time<=$sunday_time")->select()->toarray();//第N周的数据
             }
 
             
@@ -1058,6 +1076,9 @@ class UserController extends ApiBaseController{
       $token    = $params['token'];
       $Common   = new CommonController();
       $user_id  = $Common->getUserId($token);
+       //当前绑定的设备号
+      $device_sn = Db::name('device_user_rel')->where("user_id=$user_id and status=1")->value('device_id');
+
       $res = $this->GetTheMonth($month_time);
       $month_first_day  = $res[0];
       $month_last_day   = $res[1];
@@ -1065,7 +1086,7 @@ class UserController extends ApiBaseController{
       $type = isset($params['type'])?intval($params['type']):0;//type  2心率3睡眠4血压
       //指定月的数据
       if($type==2){
-          $res_month = Db::name('user_heart_rate')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->order('add_time asc')->select()->toarray();
+          $res_month = Db::name('user_heart_rate')->where("device_sn =$device_sn and user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->order('add_time asc')->select()->toarray();
           $all_month_min_heart_rate   = 0;
           $all_month_max_heart_rate   = 0;
           $all_month_avg_heart_rate   = 0;
@@ -1084,7 +1105,7 @@ class UserController extends ApiBaseController{
       }
 
       if($type==3){
-        $res_month = Db::name('user_sleep')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->select()->toarray();
+        $res_month = Db::name('user_sleep')->where("device_sn =$device_sn and user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->select()->toarray();
         $all_month_deep_sleep       = 0;
         $all_month_light_sleep      = 0;
         $all_month_sleep_time       = 0;
@@ -1104,7 +1125,7 @@ class UserController extends ApiBaseController{
       }
 
       if($type==4){
-        $res_month = Db::name('user_blood_pressure')->where("user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->select()->toarray();
+        $res_month = Db::name('user_blood_pressure')->where("device_sn =$device_sn and user_id = $user_id")->where("add_time>=$month_first_day and add_time<=$month_last_day")->select()->toarray();
         $all_month_blood_pressure  = 0;
         $all_month_blood_oxygen    = 0;
         $all_month_fatigue         = 0;
