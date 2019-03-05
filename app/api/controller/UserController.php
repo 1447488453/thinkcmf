@@ -650,9 +650,9 @@ class UserController extends ApiBaseController{
         }
 
        
-        $week_day = array('1'=>'','2'=>'','3'=>'','4'=>'','5'=>'','6'=>'','7'=>'');
+        $week_day = array('1'=>'','2'=>'','3'=>'','4'=>'','5'=>'','6'=>'','7'=>'');//一周七天
          //时间数组
-        $c = array('00'=>0,'01'=>0,'02'=>0,'03'=>0,'04'=>0,'05'=>0,'06'=>0,'07'=>0,'08'=>0,'09'=>0,'10'=>0,'11'=>0,'12'=>0,'13'=>0,'14'=>0,'15'=>0,'16'=>0,'17'=>0,'18'=>0,'19'=>0,'20'=>0,'21'=>0,'22'=>0,'23'=>0);
+        $c = array('00'=>0,'01'=>0,'02'=>0,'03'=>0,'04'=>0,'05'=>0,'06'=>0,'07'=>0,'08'=>0,'09'=>0,'10'=>0,'11'=>0,'12'=>0,'13'=>0,'14'=>0,'15'=>0,'16'=>0,'17'=>0,'18'=>0,'19'=>0,'20'=>0,'21'=>0,'22'=>0,'23'=>0);//一天24小时
         $p ='';
         $q ='';
         foreach ($res as $k => $v){ 
@@ -741,8 +741,8 @@ class UserController extends ApiBaseController{
               }
           }
         }
-        $q['a']=date('Y-m-d',$a);
-        $q['b']=date('Y-m-d',$b);
+        $m_week['monday_time']=date('Y-m-d',$a);
+        $m_week['sunday_time']=date('Y-m-d',$b);
         $z['0'] =$q;
         // print_r($z);exit;
         // 返回当前所在周的第一天(周一)日期
@@ -756,7 +756,7 @@ class UserController extends ApiBaseController{
         $count_week=($n-$a)/(60*60*24)/7-1;
       
         $week_id = isset($params['week_id'])?intval($params['week_id']):$count_week;//默认为当前周
-
+        $s = array();
         for($i=1;$i<=$count_week;$i++){
             $monday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*$i));
             $sunday_time = strtotime(date("Y-m-d",($now - ($diff_day * 60 * 60 * 24))+60*60*24*7*($i+1)))-1;
@@ -800,9 +800,9 @@ class UserController extends ApiBaseController{
                       }
                   }
                }
-               $z[$i]['monday_time'] =date('Y-m-d',$monday_time);
-               $z[$i]['sunday_time'] =date('Y-m-d',$sunday_time);
             }
+            $m_week[$i]['monday_time'] = date('Y-m-d',$monday_time);
+            $m_week[$i]['sunday_time'] = date('Y-m-d',$sunday_time);
         }
 
         if(isset($z[$week_id])){
@@ -816,7 +816,7 @@ class UserController extends ApiBaseController{
         }else{
           $res_is_valid =array();
         }
-        return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res,'res_is_valid'=>$res_is_valid]); 
+        return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res,'res_is_valid'=>$res_is_valid,'m_week'=>$m_week[$week_id]]); 
     }
     //获取指定月步数的数据
     public function getmonth_info(){
@@ -1008,9 +1008,8 @@ class UserController extends ApiBaseController{
               }
           }
         }
-
-        $P['monday_time']=date('Y-m-d',$a);
-        $P['sunday_time']=date('Y-m-d',$b);
+        $m_week['monday_time']=date('Y-m-d',$a);
+        $m_week['sunday_time']=date('Y-m-d',$b);
         $z['0'] =$p;
           // 返回当前所在周的第一天(周一)日期
         $now1 = time();    //当时的时间戳
@@ -1061,8 +1060,8 @@ class UserController extends ApiBaseController{
              }
              $z[$i]= $p1; 
 
-              $z[$i]['monday_time'] =date('Y-m-d',$monday_time);
-              $z[$i]['sunday_time'] =date('Y-m-d',$sunday_time);   
+            $m_week[$i]['monday_time'] = date('Y-m-d',$monday_time);
+            $m_week[$i]['sunday_time'] = date('Y-m-d',$sunday_time);
         }
         if(isset($z[$week_id])){
           $res = $z[$week_id];
@@ -1071,7 +1070,7 @@ class UserController extends ApiBaseController{
         }
         // echo "<pre>";
         // print_r($res);exit;
-        return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res]); 
+        return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res,'m_week'=>$m_week[$week_id]]); 
     }
     //获取指定月的睡眠 心率 血压数据
     public function get_zdmonth_info(){
