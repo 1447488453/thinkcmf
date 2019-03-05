@@ -811,12 +811,14 @@ class UserController extends ApiBaseController{
           $res =array();
         }
 
+        $m_w = isset($m_week[$week_id])?$m_week[$week_id]:array();
+
         if(isset($res_is_valid[$week_id])){
           $res_is_valid = $res_is_valid[$week_id];
         }else{
           $res_is_valid =array();
         }
-        return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res,'res_is_valid'=>$res_is_valid,'m_week'=>$m_week[$week_id]]); 
+        return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res,'res_is_valid'=>$res_is_valid,'m_week'=>$m_w]); 
     }
     //获取指定月步数的数据
     public function getmonth_info(){
@@ -1068,9 +1070,11 @@ class UserController extends ApiBaseController{
         }else{
           $res =array();
         }
+
+        $m_w = isset($m_week[$week_id])?$m_week[$week_id]:array();
         // echo "<pre>";
         // print_r($res);exit;
-        return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res,'m_week'=>$m_week[$week_id]]); 
+        return json(['error'=>0,'msg'=>'success','now_week_id'=>$count_week,'data'=>$res,'m_week'=>$m_w]); 
     }
     //获取指定月的睡眠 心率 血压数据
     public function get_zdmonth_info(){
