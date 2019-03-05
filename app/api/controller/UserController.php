@@ -741,8 +741,8 @@ class UserController extends ApiBaseController{
               }
           }
         }
-        $m_week['monday_time']=date('Y-m-d',$a);
-        $m_week['sunday_time']=date('Y-m-d',$b);
+        $m_week['0']['monday_time']=date('Y-m-d',$a);
+        $m_week['0']['sunday_time']=date('Y-m-d',$b);
         $z['0'] =$q;
         // print_r($z);exit;
         // 返回当前所在周的第一天(周一)日期
@@ -1008,8 +1008,8 @@ class UserController extends ApiBaseController{
               }
           }
         }
-        $m_week['monday_time']=date('Y-m-d',$a);
-        $m_week['sunday_time']=date('Y-m-d',$b);
+        $m_week['0']['monday_time']=date('Y-m-d',$a);
+        $m_week['0']['sunday_time']=date('Y-m-d',$b);
         $z['0'] =$p;
           // 返回当前所在周的第一天(周一)日期
         $now1 = time();    //当时的时间戳
